@@ -1,0 +1,289 @@
+.root {
+    -fx-font-family: "Segoe UI", "Consolas", sans-serif;
+}
+
+.app-root {
+    -bg-gradient-a: #1c1d22;
+    -bg-gradient-b: #181a1f;
+    -panel: #1f2229;
+    -panel-elevated: #2a2f38;
+    -panel-soft: #15181e;
+    -input-bg: #1b1f26;
+    -text-main: #f2f4f8;
+    -text-muted: #a9b0bc;
+    -accent-a: #1f8bff;
+    -accent-b: #0b62d6;
+    -accent-strong: #1a78f2;
+    -border-soft: rgba(255, 255, 255, 0.11);
+    -shadow: rgba(0, 0, 0, 0.45);
+    -fx-background-color: linear-gradient(to bottom right, -bg-gradient-a, -bg-gradient-b 62%, #15171b);
+}
+
+.app-root.light-mode {
+    -bg-gradient-a: #f5f7fc;
+    -bg-gradient-b: #eef2f9;
+    -panel: #ffffff;
+    -panel-elevated: #f6f9ff;
+    -panel-soft: #f4f7fd;
+    -input-bg: #ffffff;
+    -text-main: #19233a;
+    -text-muted: #5f6f8f;
+    -accent-a: #0066ff;
+    -accent-b: #0099ff;
+    -accent-strong: #1458d6;
+    -border-soft: rgba(18, 35, 66, 0.12);
+    -shadow: rgba(18, 35, 66, 0.14);
+}
+
+.divider {
+    -fx-background-color: -border-soft;
+}
+
+.sidebar {
+    -fx-background-color: linear-gradient(to bottom, derive(-panel, 6%), -panel);
+    -fx-border-color: transparent;
+}
+
+.logo {
+    -fx-text-fill: -text-main;
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+}
+
+.logo-subtitle {
+    -fx-text-fill: -text-muted;
+    -fx-font-size: 12px;
+    -fx-padding: -4 0 8 0;
+}
+
+.new-chat-button {
+    -fx-background-color: linear-gradient(to right, -accent-a, -accent-b);
+    -fx-text-fill: white;
+    -fx-background-radius: 12;
+    -fx-padding: 10 14;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.new-chat-button:hover {
+    -fx-background-color: linear-gradient(to right, derive(-accent-a, 6%), derive(-accent-b, 6%));
+}
+
+.history-list {
+    -fx-background-color: transparent;
+    -fx-control-inner-background: -panel-soft;
+    -fx-background-insets: 0;
+    -fx-padding: 4;
+    -fx-border-color: -border-soft;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+}
+
+.history-list .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: -text-main;
+    -fx-padding: 10;
+}
+
+.history-list .list-cell:filled:selected,
+.history-list .list-cell:filled:hover {
+    -fx-background-color: rgba(31, 139, 255, 0.24);
+    -fx-background-radius: 10;
+}
+
+.chat-root {
+    -fx-background-color: transparent;
+}
+
+.chat-title {
+    -fx-text-fill: -text-main;
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+}
+
+.chat-subtitle {
+    -fx-text-fill: -text-muted;
+    -fx-font-size: 12px;
+}
+
+.theme-button {
+    -fx-background-color: -panel-elevated;
+    -fx-text-fill: -text-main;
+    -fx-background-radius: 20;
+    -fx-border-color: -border-soft;
+    -fx-border-radius: 20;
+    -fx-padding: 7 14;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.typing-label {
+    -fx-text-fill: -accent-a;
+    -fx-font-size: 12px;
+}
+
+.chat-scroll {
+    -fx-background: transparent;
+    -fx-background-color: transparent;
+    -fx-padding: 8 0;
+}
+
+.chat-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.chat-scroll .scroll-bar:horizontal {
+    -fx-opacity: 0;
+    -fx-padding: -100;
+}
+
+.messages-box {
+    -fx-spacing: 10;
+}
+
+.message-row {
+    -fx-padding: 2 0;
+}
+
+.bubble {
+    -fx-background-radius: 20;
+    -fx-padding: 12 14;
+    -fx-max-width: 790;
+    -fx-effect: dropshadow(gaussian, -shadow, 24, 0.12, 0, 7);
+}
+
+.user-bubble {
+    -fx-background-color: linear-gradient(to bottom right, -accent-a, -accent-b);
+}
+
+.bot-bubble {
+    -fx-background-color: -panel;
+}
+
+.answer-card {
+    -fx-border-color: -border-soft;
+    -fx-border-radius: 20;
+}
+
+.bubble-header {
+    -fx-text-fill: -text-muted;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+
+.bubble-text {
+    -fx-text-fill: #f5f9ff;
+    -fx-font-size: 13.5px;
+}
+
+.app-root.light-mode .bubble-text {
+    -fx-text-fill: #ffffff;
+}
+
+.answer-h2 {
+    -fx-text-fill: -text-main;
+    -fx-font-size: 30px;
+    -fx-font-weight: bold;
+}
+
+.answer-h3 {
+    -fx-text-fill: -text-main;
+    -fx-font-size: 17px;
+    -fx-font-weight: bold;
+}
+
+.answer-text {
+    -fx-text-fill: -text-main;
+    -fx-font-size: 14px;
+}
+
+.answer-bullet {
+    -fx-text-fill: -text-main;
+    -fx-font-size: 14px;
+    -fx-padding: 0 0 0 2;
+}
+
+.code-panel {
+    -fx-background-color: #111317;
+    -fx-border-color: rgba(255, 255, 255, 0.08);
+    -fx-border-radius: 16;
+    -fx-background-radius: 16;
+    -fx-padding: 12;
+}
+
+.app-root.light-mode .code-panel {
+    -fx-background-color: #0f1728;
+}
+
+.code-badge {
+    -fx-background-color: rgba(31, 139, 255, 0.24);
+    -fx-text-fill: #d9e8ff;
+    -fx-background-radius: 9;
+    -fx-padding: 3 10;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+
+.code-text {
+    -fx-font-family: "Consolas", "Courier New", monospace;
+    -fx-font-size: 12.5px;
+    -fx-text-fill: #edf1f8;
+    -fx-background-color: transparent;
+}
+
+.copy-button {
+    -fx-background-color: #2a2f38;
+    -fx-text-fill: #f0f4ff;
+    -fx-background-radius: 10;
+    -fx-padding: 4 10;
+    -fx-font-size: 11px;
+    -fx-cursor: hand;
+}
+
+.copy-button:hover {
+    -fx-background-color: #353c47;
+}
+
+.composer {
+    -fx-background-color: -panel;
+    -fx-border-color: -border-soft;
+    -fx-background-radius: 16;
+    -fx-border-radius: 16;
+}
+
+.input-area {
+    -fx-background-color: -input-bg;
+    -fx-control-inner-background: -input-bg;
+    -fx-text-fill: -text-main;
+    -fx-prompt-text-fill: -text-muted;
+    -fx-background-radius: 12;
+    -fx-border-color: -border-soft;
+    -fx-border-radius: 12;
+    -fx-padding: 10;
+    -fx-font-size: 14px;
+}
+
+.input-area .scroll-pane,
+.input-area .scroll-pane .viewport {
+    -fx-background-color: transparent;
+}
+
+.input-area .scroll-bar:vertical,
+.input-area .scroll-bar:horizontal {
+    -fx-opacity: 0;
+    -fx-max-height: 0;
+    -fx-max-width: 0;
+}
+
+.send-button {
+    -fx-background-color: linear-gradient(to right, -accent-a, -accent-b);
+    -fx-text-fill: white;
+    -fx-background-radius: 12;
+    -fx-padding: 11 18;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.send-button:hover {
+    -fx-background-color: linear-gradient(to right, derive(-accent-a, 8%), derive(-accent-b, 8%));
+}
