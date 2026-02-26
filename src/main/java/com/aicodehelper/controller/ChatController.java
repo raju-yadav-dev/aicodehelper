@@ -21,10 +21,11 @@ public class ChatController {
 
     private final List<String> chatHistory = new ArrayList<>();
     private final List<Message> messages = new ArrayList<>();
+    private boolean hasAddedToHistory = false;
 
     public void startNewChat() {
-        chatHistory.add(0, "Chat " + (chatHistory.size() + 1));
         messages.clear();
+        hasAddedToHistory = false;
     }
 
     public List<String> getChatHistory() {
@@ -36,7 +37,13 @@ public class ChatController {
     }
 
     public Message createUserMessage(String input) {
-        return new Message(Message.Sender.USER, input, LocalDateTime.now(), false);
+        Message message = new Message(Message.Sender.USER, input, LocalDateTime.now(), false);
+        if (!hasAddedToHistory) {
+            String title = generateChatTitle(input);
+            chatHistory.add(0, title);
+            hasAddedToHistory = true;
+        }
+        return message;
     }
 
     public Message createBotReply(String input) {
@@ -152,6 +159,45 @@ public class ChatController {
             return "cpp";
         }
         return "text";
+    }
+
+    private String generateChatTitle(String input) {
+        String trimmed = input.trim();
+        if (trimmed.isEmpty()) {
+            return "New Chat";
+        }
+
+        // Try to extract a meaningful title from the first sentence or question
+        String[] sentences = trimmed.split("[.!?]");
+        String firstSentence = sentences.length > 0 ? sentences[0].trim() : trimmed;
+
+        // If it's a question starting with common words, include them
+        if (firstSentence.toLowerCase().startsWith("how") ||
+            firstSentence.toLowerCase().startsWith("what") ||
+            firstSentence.toLowerCase().startsWith("why") ||
+            firstSentence.toLowerCase().startsWith("can") ||
+            firstSentence.toLowerCase().startsWith("help")) {
+            if (firstSentence.length() <= 50) {
+                return firstSentence;
+            }
+            return firstSentence.substring(0, 47) + "...";
+        }
+
+        // For code or other content, take first meaningful part
+        if (firstSentence.length() <= 50) {
+            return firstSentence;
+        }
+
+        // Find a good break point (space) near 47 chars
+        int breakPoint = 47;
+        while (breakPoint > 30 && firstSentence.charAt(breakPoint) != ' ') {
+            breakPoint--;
+        }
+        if (breakPoint <= 30) {
+            breakPoint = 47;
+        }
+
+        return firstSentence.substring(0, breakPoint) + "...";
     }
 
     private String summarizeForInlineCode(String value) {

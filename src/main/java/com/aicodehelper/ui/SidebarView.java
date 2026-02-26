@@ -19,20 +19,30 @@ public class SidebarView extends VBox {
         getStyleClass().add("sidebar");
         setPadding(new Insets(16));
         setSpacing(12);
-        setPrefWidth(250);
+        setPrefWidth(230);
+        setMinWidth(190);
+        setMaxWidth(320);
 
-        Label logo = new Label("AI Code Helper");
+        Label logo = new Label("Cortex");
         logo.getStyleClass().add("logo");
 
         Label subtitle = new Label("for Beginners");
         subtitle.getStyleClass().add("logo-subtitle");
+        subtitle.setVisible(false);
+        subtitle.setManaged(false);
 
         newChatButton.getStyleClass().add("new-chat-button");
+
+        // search field just below new chat button
+        javafx.scene.control.TextField sidebarSearch = new javafx.scene.control.TextField();
+        sidebarSearch.setPromptText("Search conversations...");
+        sidebarSearch.getStyleClass().add("sidebar-search");
+        sidebarSearch.setFocusTraversable(true);
 
         historyView.getStyleClass().add("history-list");
         VBox.setVgrow(historyView, Priority.ALWAYS);
 
-        getChildren().addAll(logo, subtitle, newChatButton, historyView);
+        getChildren().addAll(logo, subtitle, newChatButton, sidebarSearch, historyView);
         setAlignment(Pos.TOP_LEFT);
     }
 

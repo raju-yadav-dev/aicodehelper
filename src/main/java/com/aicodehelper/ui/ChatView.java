@@ -10,6 +10,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
 /**
@@ -19,33 +20,26 @@ public class ChatView extends BorderPane {
     private final VBox messagesBox = new VBox(6);
     private final ScrollPane scrollPane = new ScrollPane(messagesBox);
     private final TextArea inputArea = new TextArea();
-    private final Button sendButton = new Button("Send");
+    private final Button sendIconButton = new Button("↑");
     private final Button themeButton = new Button("Light");
     private final Label typingLabel = new Label("AI is typing...");
+    // searchField moved to sidebar
+    // private final javafx.scene.control.TextField searchField = new javafx.scene.control.TextField();
 
     public ChatView() {
         getStyleClass().add("chat-root");
         setPadding(new Insets(16));
 
-        Label title = new Label("AI Code Helper for Beginners");
-        title.getStyleClass().add("chat-title");
-        Label subtitle = new Label("Learn coding with guided, structured AI answers");
-        subtitle.getStyleClass().add("chat-subtitle");
-
+        // top header now only contains typing label and theme button placeholder
+        themeButton.getStyleClass().add("theme-button");
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+        HBox headerRow = new HBox(10, spacer, themeButton);
+        headerRow.setAlignment(Pos.CENTER);
         typingLabel.getStyleClass().add("typing-label");
         typingLabel.setVisible(false);
         typingLabel.setManaged(false);
-
-        themeButton.getStyleClass().add("theme-button");
-
-        Region topSpacer = new Region();
-        HBox.setHgrow(topSpacer, Priority.ALWAYS);
-
-        VBox titleBlock = new VBox(3, title, subtitle);
-        HBox titleRow = new HBox(10, titleBlock, topSpacer, themeButton);
-        titleRow.setAlignment(Pos.CENTER_LEFT);
-
-        VBox top = new VBox(6, titleRow, typingLabel);
+        VBox top = new VBox(6, headerRow, typingLabel);
         setTop(top);
 
         messagesBox.getStyleClass().add("messages-box");
@@ -56,7 +50,9 @@ public class ChatView extends BorderPane {
         scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         VBox.setVgrow(scrollPane, Priority.ALWAYS);
 
-        setCenter(scrollPane);
+        StackPane chatContainer = new StackPane(scrollPane);
+        chatContainer.getStyleClass().add("chat-container");
+        setCenter(chatContainer);
 
         inputArea.setPromptText("Ask a coding question, paste code, or describe an error...");
         inputArea.setWrapText(true);
@@ -65,19 +61,28 @@ public class ChatView extends BorderPane {
         inputArea.setMinHeight(72);
         inputArea.textProperty().addListener((obs, oldText, newText) -> resizeInput());
 
-        sendButton.getStyleClass().add("send-button");
+        // Create send icon button
+        sendIconButton.getStyleClass().add("send-icon-button");
+        sendIconButton.setOnAction(e -> {
+            // This will be wired in MainLayout
+        });
 
-        HBox inputRow = new HBox(10, inputArea, sendButton);
+        // Stack the input area and send button
+        StackPane inputContainer = new StackPane(inputArea, sendIconButton);
+        StackPane.setAlignment(sendIconButton, Pos.CENTER_RIGHT);
+        StackPane.setMargin(sendIconButton, new Insets(0, 12, 0, 0));
+
+        HBox inputRow = new HBox(10, inputContainer);
         inputRow.getStyleClass().add("composer");
         inputRow.setAlignment(Pos.BOTTOM_RIGHT);
-        HBox.setHgrow(inputArea, Priority.ALWAYS);
+        HBox.setHgrow(inputContainer, Priority.ALWAYS);
         inputRow.setPadding(new Insets(10));
 
         setBottom(inputRow);
     }
 
     private void resizeInput() {
-        int lines = Math.max(2, Math.min(8, inputArea.getText().split("\\R", -1).length));
+        int lines = Math.max(1, Math.min(4, inputArea.getText().split("\\R", -1).length));
         inputArea.setPrefRowCount(lines);
     }
 
@@ -93,8 +98,8 @@ public class ChatView extends BorderPane {
         return inputArea;
     }
 
-    public Button getSendButton() {
-        return sendButton;
+    public Button getSendIconButton() {
+        return sendIconButton;
     }
 
     public Button getThemeButton() {
