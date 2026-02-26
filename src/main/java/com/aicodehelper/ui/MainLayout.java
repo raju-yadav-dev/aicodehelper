@@ -13,6 +13,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -35,20 +36,27 @@ public class MainLayout {
 
         HBox centerContainer = new HBox(sidebarView, divider, chatView);
         HBox.setHgrow(chatView, Priority.ALWAYS);
+        centerContainer.setMinSize(0, 0);
 
         root.setCenter(centerContainer);
+        root.setMinSize(0, 0);
 
-        Scene scene = new Scene(root, 1200, 760);
+        javafx.geometry.Rectangle2D visualBounds = Screen.getPrimary().getVisualBounds();
+        double sceneWidth = Math.min(1200, Math.max(900, visualBounds.getWidth() * 0.9));
+        double sceneHeight = Math.min(760, Math.max(620, visualBounds.getHeight() * 0.9));
+        Scene scene = new Scene(root, sceneWidth, sceneHeight);
         scene.getStylesheets().add(MainLayout.class.getResource("/styles/app.css").toExternalForm());
 
         wireActions();
         chatController.startNewChat();
         refreshHistory();
 
-        stage.setTitle("AI Code Helper for Beginners");
+        stage.setTitle("Cortex");
         stage.setScene(scene);
-        stage.setMinWidth(920);
-        stage.setMinHeight(600);
+        stage.setMinWidth(780);
+        stage.setMinHeight(540);
+        stage.setMaxWidth(visualBounds.getWidth());
+        stage.setMaxHeight(visualBounds.getHeight());
         stage.show();
     }
 
@@ -59,7 +67,7 @@ public class MainLayout {
             refreshHistory();
         });
 
-        chatView.getSendButton().setOnAction(e -> sendMessage());
+        chatView.getSendIconButton().setOnAction(e -> sendMessage());
         chatView.getThemeButton().setOnAction(e -> toggleTheme());
         chatView.getInputArea().addEventFilter(KeyEvent.KEY_PRESSED, event -> {
             if (event.getCode() == KeyCode.ENTER && !event.isShiftDown()) {
@@ -96,12 +104,31 @@ public class MainLayout {
             showTemporaryStatus("Copied to clipboard");
         });
 
+        // start invisible and slightly shifted
+        bubble.setOpacity(0);
+        bubble.setTranslateY(10);
+
         chatView.getMessagesBox().getChildren().add(bubble);
-        autoScrollToBottom();
+
+        // animation
+        javafx.animation.FadeTransition fade = new javafx.animation.FadeTransition(javafx.util.Duration.millis(300), bubble);
+        fade.setToValue(1);
+        javafx.animation.TranslateTransition slide = new javafx.animation.TranslateTransition(javafx.util.Duration.millis(300), bubble);
+        slide.setToY(0);
+        javafx.animation.ParallelTransition pt = new javafx.animation.ParallelTransition(fade, slide);
+        pt.setOnFinished(e -> autoScrollToBottom());
+        pt.play();
     }
 
     private void autoScrollToBottom() {
-        Platform.runLater(() -> chatView.getScrollPane().setVvalue(1.0));
+        Platform.runLater(() -> {
+            javafx.beans.property.DoubleProperty v = chatView.getScrollPane().vvalueProperty();
+            javafx.animation.Timeline timeline = new javafx.animation.Timeline(
+                    new javafx.animation.KeyFrame(javafx.util.Duration.millis(300),
+                            new javafx.animation.KeyValue(v, 1.0, javafx.animation.Interpolator.EASE_BOTH))
+            );
+            timeline.play();
+        });
     }
 
     private void runTypingAnimation(Runnable onFinished) {
