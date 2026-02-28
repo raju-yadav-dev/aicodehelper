@@ -23,26 +23,102 @@
 /* ================= DARK THEME ================= */
 .window-root.theme-dark {
     /* surfaces */
-    -app-bg: rgba(10, 14, 28, 0.78);
-    -app-surface: rgba(19, 24, 39, 0.72);
-    -app-surface-elevated: rgba(29, 37, 58, 0.76);
-    -app-border: rgba(94, 114, 164, 0.46);
+    -app-bg: rgba(11, 16, 32, 0.82);
+    -app-surface: rgba(20, 27, 51, 0.66);
+    -app-surface-elevated: rgba(30, 41, 74, 0.74);
+    -app-border: rgba(181, 192, 230, 0.34);
     -app-separator: #000000;
 
     /* accent */
-    -app-accent: #238636;
-    -app-accent-soft: rgba(35, 134, 54, 0.62);
-    -app-accent-hover: #2ea043;
-    -app-accent-pressed: #196c2e;
+    -app-accent: #5b8cff;
+    -app-accent-soft: rgba(91, 140, 255, 0.66);
+    -app-accent-hover: #7aa2ff;
+    -app-accent-pressed: #3f6fe0;
 
     /* text */
-    -app-text-primary: #e6edf3;
-    -app-text-secondary: #8b949e;
-    -app-text-muted: #6e7681;
+    -app-text-primary: #eaf0ff;
+    -app-text-secondary: rgba(181, 192, 230, 0.92);
+    -app-text-muted: rgba(181, 192, 230, 0.72);
 
     /* states */
-    -app-muted-hover: rgba(139, 148, 158, 0.22);
-    -app-focus-ring: rgba(46, 160, 67, 0.35);
+    -app-muted-hover: rgba(181, 192, 230, 0.18);
+    -app-focus-ring: rgba(91, 140, 255, 0.40);
+}
+
+/* Dark theme glass + shadow buttons (same behavior as light mode) */
+.window-root.theme-dark .button,
+.window-root.theme-dark .menu-button {
+    -fx-background-color:
+        linear-gradient(to bottom, rgba(73, 94, 156, 0.72), rgba(30, 41, 74, 0.72)),
+        rgba(20, 27, 51, 0.74);
+    -fx-background-insets: 0, 0;
+    -fx-background-radius: 999;
+    -fx-border-color: rgba(181, 192, 230, 0.30);
+    -fx-border-width: 1;
+    -fx-border-radius: 999;
+    -fx-text-fill: #eaf0ff;
+    -fx-effect: dropshadow(gaussian, rgba(3, 6, 18, 0.72), 18, 0.24, 0, 6);
+}
+
+.window-root.theme-dark .menu-button .label {
+    -fx-text-fill: #eaf0ff;
+}
+
+.window-root.theme-dark .button:hover,
+.window-root.theme-dark .menu-button:hover {
+    -fx-background-color:
+        linear-gradient(to bottom, rgba(122, 162, 255, 0.74), rgba(73, 94, 156, 0.72)),
+        rgba(30, 41, 74, 0.78);
+    -fx-border-color: rgba(181, 192, 230, 0.46);
+    -fx-effect: dropshadow(gaussian, rgba(3, 6, 18, 0.80), 22, 0.28, 0, 7);
+}
+
+.window-root.theme-dark .button:pressed,
+.window-root.theme-dark .menu-button:showing {
+    -fx-background-color:
+        linear-gradient(to bottom, rgba(63, 111, 224, 0.76), rgba(30, 41, 74, 0.74)),
+        rgba(20, 27, 51, 0.76);
+    -fx-border-color: rgba(181, 192, 230, 0.32);
+    -fx-effect: innershadow(gaussian, rgba(234, 240, 255, 0.16), 10, 0.2, 0, 1);
+}
+
+.window-root.theme-dark .chat-history-list .list-cell {
+    -fx-background-color:
+        linear-gradient(to bottom, rgba(73, 94, 156, 0.66), rgba(30, 41, 74, 0.68)),
+        rgba(20, 27, 51, 0.70);
+    -fx-background-insets: 5 0 5 0;
+    -fx-border-color: rgba(181, 192, 230, 0.32);
+    -fx-border-width: 1;
+    -fx-border-insets: 5 0 5 0;
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-text-fill: #eaf0ff;
+    -fx-padding: 0 8 0 8;
+    -fx-effect: dropshadow(gaussian, rgba(3, 6, 18, 0.72), 18, 0.24, 0, 6);
+}
+
+.window-root.theme-dark .chat-history-list .list-cell:empty {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-effect: null;
+    -fx-padding: 0;
+}
+
+.window-root.theme-dark .chat-history-list .list-cell:filled:hover {
+    -fx-background-color:
+        linear-gradient(to bottom, rgba(122, 162, 255, 0.72), rgba(73, 94, 156, 0.70)),
+        rgba(30, 41, 74, 0.76);
+    -fx-border-color: rgba(181, 192, 230, 0.44);
+    -fx-effect: dropshadow(gaussian, rgba(3, 6, 18, 0.80), 22, 0.28, 0, 7);
+}
+
+.window-root.theme-dark .chat-history-list .list-cell:filled:selected,
+.window-root.theme-dark .chat-history-list .list-cell:filled:selected:focused {
+    -fx-background-color:
+        linear-gradient(to bottom, rgba(63, 111, 224, 0.76), rgba(30, 41, 74, 0.74)),
+        rgba(20, 27, 51, 0.74);
+    -fx-border-color: rgba(181, 192, 230, 0.34);
+    -fx-effect: innershadow(gaussian, rgba(234, 240, 255, 0.16), 10, 0.2, 0, 1);
 }
 
 /* ================= LIGHT THEME ================= */
