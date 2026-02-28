@@ -1,13 +1,26 @@
 .root {
     -fx-font-family: "Segoe UI", "Inter", sans-serif;
+    -fx-background-color:
+        /* Blob gradient background */
+        background:
+        radial-gradient(circle at 15% 25%, #ff7a7a, transparent 40%),
+        radial-gradient(circle at 85% 20%, #ffb86b, transparent 40%),
+        radial-gradient(circle at 70% 75%, #7c7cff, transparent 45%),
+        radial-gradient(circle at 30% 80%, #ff6ec7, transparent 45%),
+        radial-gradient(circle at 50% 50%, #6a5acd, #2b1055);
+
+        background-repeat:no-repeat;
+        background-size:cover;
 }
 
 /* ================= BASE TOKENS / DEFAULTS ================= */
 .window-root {
-    -app-bg: #0d1117;
-    -app-surface: #161b22;
-    -app-border: #30363d;
+    -app-bg: rgba(10, 14, 28, 0.78);
+    -app-surface: rgba(19, 24, 39, 0.72);
+    -app-border: rgba(94, 114, 164, 0.46);
+    -app-separator: #000000;
     -app-accent: #2f81f7;
+    -app-accent-soft: rgba(47, 129, 247, 0.62);
     -app-accent-hover: #1f6feb;
     -app-accent-pressed: #1158c7;
     -app-text-primary: #e6edf3;
@@ -21,13 +34,15 @@
 /* ================= DARK THEME ================= */
 .window-root.theme-dark {
     /* surfaces */
-    -app-bg: #0d1117;
-    -app-surface: #161b22;
-    -app-surface-elevated: #21262d;
-    -app-border: #30363d;
+    -app-bg: rgba(10, 14, 28, 0.78);
+    -app-surface: rgba(19, 24, 39, 0.72);
+    -app-surface-elevated: rgba(29, 37, 58, 0.76);
+    -app-border: rgba(94, 114, 164, 0.46);
+    -app-separator: #000000;
 
     /* accent */
     -app-accent: #238636;
+    -app-accent-soft: rgba(35, 134, 54, 0.62);
     -app-accent-hover: #2ea043;
     -app-accent-pressed: #196c2e;
 
@@ -44,13 +59,15 @@
 /* ================= LIGHT THEME ================= */
 .window-root.theme-light {
     /* surfaces */
-    -app-bg: #ffffff;
-    -app-surface: #f6f8fa;
-    -app-surface-elevated: #ffffff;
-    -app-border: #d0d7de;
+    -app-bg: rgba(247, 250, 255, 0.86);
+    -app-surface: rgba(255, 255, 255, 0.82);
+    -app-surface-elevated: rgba(255, 255, 255, 0.88);
+    -app-border: rgba(203, 213, 225, 0.72);
+    -app-separator: #ffffff;
 
     /* accent */
     -app-accent: #2da44e;
+    -app-accent-soft: rgba(45, 164, 78, 0.62);
     -app-accent-hover: #2c974b;
     -app-accent-pressed: #298e46;
 
@@ -62,8 +79,10 @@
     /* states */
     -app-muted-hover: rgba(87, 96, 106, 0.15);
     -app-focus-ring: rgba(45, 164, 78, 0.35);
+    -fx-background-image: none;
 }
 
+/* Light mode blob gradient background */
 .window-root.maximized {
     -fx-padding: 0;
 }
@@ -86,8 +105,8 @@
 /* ================= TITLE BAR / WINDOW CONTROLS ================= */
 .title-bar {
     -fx-background-color: -app-surface;
-    -fx-border-color: transparent transparent -app-border transparent;
-    -fx-border-width: 0 0 1 0;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
 }
 
 .titlebar-label {
@@ -220,27 +239,38 @@
     -fx-min-width: 220;
     -fx-pref-width: 260;
     -fx-background-color: -app-surface;
-    -fx-border-color: transparent -app-border transparent transparent;
-    -fx-border-width: 0 1 0 0;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
 }
 
 .new-chat-button {
+    -fx-min-width: 220;
+    -fx-pref-width: 220;
     -fx-max-width: Infinity;
     -fx-background-color: -app-surface-elevated;
-    -fx-border-color: -app-border;
-    -fx-border-width: 1;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
     -fx-border-radius: 12;
     -fx-background-radius: 12;
     -fx-text-fill: -app-text-primary;
     -fx-font-size: 13px;
     -fx-font-weight: 600;
+    -fx-alignment: center;
     -fx-padding: 10 14 10 14;
     -fx-cursor: hand;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+/* Start New Chat button only */
+#new-chat-create-button {
+    -fx-pref-width: 180;
+    -fx-pref-height: 40;
 }
 
 .new-chat-button:hover {
     -fx-background-color: -app-muted-hover;
-    -fx-border-color: -app-border;
+    -fx-border-color: transparent;
 }
 
 .new-chat-button:pressed {
@@ -250,11 +280,11 @@
 .list-view {
     -fx-background-color: -app-bg;
     -fx-control-inner-background: transparent;
-    -fx-border-color: -app-border;
-    -fx-border-width: 1;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
     -fx-border-radius: 12;
     -fx-background-radius: 12;
-    -fx-padding: 8;
+    -fx-padding: 8 2 8 2;
 }
 
 .list-view .viewport,
@@ -266,8 +296,14 @@
     -fx-background-color: transparent;
     -fx-text-fill: -app-text-secondary;
     -fx-font-size: 13px;
-    -fx-padding: 10 10 10 10;
+    -fx-padding: 10 12 10 12;
+    -fx-background-insets: 2 0 2 0;
     -fx-background-radius: 10;
+}
+
+.list-cell:empty {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
 }
 
 .list-cell:filled:hover {
@@ -279,8 +315,16 @@
 .list-cell:filled:selected:focused {
     -fx-background-color: -app-muted-hover;
     -fx-text-fill: -app-text-primary;
-    -fx-border-color: transparent transparent transparent -app-text-muted;
-    -fx-border-width: 0 0 0 2;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+}
+
+/* History list rows like "New Chat" */
+.chat-history-list .list-cell {
+    -fx-alignment: center;
+    -fx-text-alignment: center;
+    -fx-padding: 0;
+    -fx-pref-height: 42;
 }
 
 /* ================= MESSAGE AREA ================= */
@@ -317,7 +361,7 @@
 }
 
 .user-bubble {
-    -fx-background-color: -app-accent;
+    -fx-background-color: -app-accent-soft;
 }
 
 .message-text {
@@ -420,7 +464,7 @@
     -fx-min-height: 36;
     -fx-pref-height: 36;
     -fx-background-radius: 999;
-    -fx-background-color: -app-accent;
+    -fx-background-color: -app-accent-soft;
     -fx-text-fill: #ffffff;
     -fx-font-size: 16px;
     -fx-font-weight: 700;

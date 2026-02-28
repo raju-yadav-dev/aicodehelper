@@ -12,7 +12,7 @@
                     <Insets top="8" right="10" bottom="8" left="10" />
                 </padding>
 
-                <Label text="ChatBot" styleClass="titlebar-label" />
+                <Label text="Cortex" styleClass="titlebar-label" />
 
                 <Region HBox.hgrow="ALWAYS" />
 
@@ -37,8 +37,8 @@
                 <padding>
                     <Insets top="20" right="14" bottom="16" left="14" />
                 </padding>
-                <Button fx:id="newChatButton" text="+ New Chat" styleClass="new-chat-button" maxWidth="Infinity" />
-                <ListView fx:id="chatList" VBox.vgrow="ALWAYS" />
+                <Button fx:id="newChatButton" id="new-chat-create-button" text="Start New Chat" styleClass="new-chat-button" maxWidth="Infinity" />
+                <ListView fx:id="chatList" styleClass="chat-history-list" VBox.vgrow="ALWAYS" />
             </VBox>
         </left>
 

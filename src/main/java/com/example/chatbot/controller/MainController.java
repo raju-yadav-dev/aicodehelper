@@ -12,6 +12,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.Cursor;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -100,7 +101,7 @@ public class MainController {
     // ================= TITLE BAR DRAG =================
     private void setupTitleBarDrag() {
         titleBar.setOnMousePressed(event -> {
-            if (event.getButton() != MouseButton.PRIMARY || isWindowControl(event.getTarget())) {
+            if (event.getButton() != MouseButton.PRIMARY || isWindowControl(event.getTarget()) || isResizeCursorActive()) {
                 return;
             }
             dragOffsetX = event.getSceneX();
@@ -108,7 +109,7 @@ public class MainController {
         });
 
         titleBar.setOnMouseDragged(event -> {
-            if (stage == null || event.getButton() != MouseButton.PRIMARY || isWindowControl(event.getTarget())) {
+            if (stage == null || event.getButton() != MouseButton.PRIMARY || isWindowControl(event.getTarget()) || isResizeCursorActive()) {
                 return;
             }
 
@@ -130,6 +131,21 @@ public class MainController {
                 toggleMaximize();
             }
         });
+    }
+
+    private boolean isResizeCursorActive() {
+        if (titleBar == null || titleBar.getScene() == null) {
+            return false;
+        }
+        Cursor cursor = titleBar.getScene().getCursor();
+        return cursor == Cursor.N_RESIZE
+                || cursor == Cursor.NE_RESIZE
+                || cursor == Cursor.E_RESIZE
+                || cursor == Cursor.SE_RESIZE
+                || cursor == Cursor.S_RESIZE
+                || cursor == Cursor.SW_RESIZE
+                || cursor == Cursor.W_RESIZE
+                || cursor == Cursor.NW_RESIZE;
     }
 
     // ================= TITLE BAR HIT TEST =================

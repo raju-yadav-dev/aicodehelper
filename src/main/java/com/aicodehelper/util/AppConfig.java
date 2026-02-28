@@ -91,7 +91,7 @@ public final class AppConfig {
     public static final String SEARCH_PLACEHOLDER = "Search conversations...";
 
     // ========== BUTTON LABELS ==========
-    public static final String NEW_CHAT_BUTTON_TEXT = "+ New Chat";
+    public static final String NEW_CHAT_BUTTON_TEXT = "Start New Chat";
     public static final String SEND_BUTTON_ICON = "↑";
     public static final String COPY_BUTTON_TEXT = "Copy";
     public static final String THEME_BUTTON_LIGHT_TEXT = "Light";
