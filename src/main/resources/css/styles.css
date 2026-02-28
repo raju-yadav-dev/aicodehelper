@@ -1,16 +1,5 @@
 .root {
     -fx-font-family: "Segoe UI", "Inter", sans-serif;
-    -fx-background-color:
-        /* Blob gradient background */
-        background:
-        radial-gradient(circle at 15% 25%, #ff7a7a, transparent 40%),
-        radial-gradient(circle at 85% 20%, #ffb86b, transparent 40%),
-        radial-gradient(circle at 70% 75%, #7c7cff, transparent 45%),
-        radial-gradient(circle at 30% 80%, #ff6ec7, transparent 45%),
-        radial-gradient(circle at 50% 50%, #6a5acd, #2b1055);
-
-        background-repeat:no-repeat;
-        background-size:cover;
 }
 
 /* ================= BASE TOKENS / DEFAULTS ================= */
@@ -59,10 +48,10 @@
 /* ================= LIGHT THEME ================= */
 .window-root.theme-light {
     /* surfaces */
-    -app-bg: rgba(247, 250, 255, 0.86);
-    -app-surface: rgba(255, 255, 255, 0.82);
-    -app-surface-elevated: rgba(255, 255, 255, 0.88);
-    -app-border: rgba(203, 213, 225, 0.72);
+    -app-bg: rgba(255, 255, 255, 0.10);
+    -app-surface: rgba(255, 255, 255, 0.16);
+    -app-surface-elevated: rgba(255, 255, 255, 0.24);
+    -app-border: rgba(255, 255, 255, 0.42);
     -app-separator: #ffffff;
 
     /* accent */
@@ -72,14 +61,163 @@
     -app-accent-pressed: #298e46;
 
     /* text */
-    -app-text-primary: #1f2328;
-    -app-text-secondary: #57606a;
-    -app-text-muted: #6e7781;
+    -app-text-primary: #f8fafc;
+    -app-text-secondary: rgba(248, 250, 252, 0.86);
+    -app-text-muted: rgba(248, 250, 252, 0.72);
 
     /* states */
     -app-muted-hover: rgba(87, 96, 106, 0.15);
     -app-focus-ring: rgba(45, 164, 78, 0.35);
-    -fx-background-image: none;
+    -fx-background-color: transparent;
+}
+
+.window-root.theme-light .app-shell {
+    -fx-background-color:
+        linear-gradient(to bottom right, rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0.08)),
+        radial-gradient(focus-angle 0deg, focus-distance 0%, center 14% 28%, radius 33%, rgba(255, 137, 150, 0.78), rgba(255, 137, 150, 0)),
+        radial-gradient(focus-angle 0deg, focus-distance 0%, center 84% 18%, radius 36%, rgba(255, 186, 111, 0.82), rgba(255, 186, 111, 0)),
+        radial-gradient(focus-angle 0deg, focus-distance 0%, center 72% 66%, radius 44%, rgba(104, 105, 255, 0.76), rgba(104, 105, 255, 0)),
+        radial-gradient(focus-angle 0deg, focus-distance 0%, center 28% 84%, radius 42%, rgba(204, 95, 205, 0.70), rgba(204, 95, 205, 0)),
+        linear-gradient(to bottom right, #c66c92 0%, #b27ca2 25%, #8e6ac8 58%, #6a68e6 100%);
+    -fx-background-insets: 0;
+    -fx-background-radius: 16;
+    -fx-border-color: rgba(255, 255, 255, 0.40);
+    -fx-effect: dropshadow(gaussian, rgba(7, 10, 24, 0.28), 34, 0.22, 0, 10);
+}
+
+.window-root.theme-light .app-shell.maximized {
+    -fx-background-radius: 0;
+}
+
+.window-root.theme-light .app-root,
+.window-root.theme-light .content-root,
+.window-root.theme-light .chat-root,
+.window-root.theme-light .chat-main,
+.window-root.theme-light .messages-scroll,
+.window-root.theme-light .messages-scroll > .viewport,
+.window-root.theme-light .messages-scroll .corner,
+.window-root.theme-light .list-view,
+.window-root.theme-light .list-view .viewport,
+.window-root.theme-light .list-view .corner {
+    -fx-background-color: transparent;
+}
+
+.window-root.theme-light .sidebar,
+.window-root.theme-light .title-bar,
+.window-root.theme-light .bot-bubble,
+.window-root.theme-light .input-shell,
+.window-root.theme-light .context-menu,
+.window-root.theme-light .new-chat-button {
+    -fx-background-color: rgba(255, 255, 255, 0.16);
+    -fx-border-color: rgba(255, 255, 255, 0.38);
+}
+
+.window-root.theme-light .user-bubble {
+    -fx-background-color: rgba(255, 255, 255, 0.26);
+    -fx-border-color: rgba(255, 255, 255, 0.34);
+    -fx-border-width: 1;
+    -fx-border-radius: 14;
+}
+
+/* Light theme glass buttons */
+.window-root.theme-light .settings-button,
+.window-root.theme-light .new-chat-button,
+.window-root.theme-light .chat-history-list .list-cell {
+    -fx-background-color:
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0.16)),
+        rgba(255, 255, 255, 0.14);
+    -fx-background-insets: 0, 0;
+    -fx-border-color: rgba(255, 255, 255, 0.42);
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(gaussian, rgba(14, 18, 35, 0.20), 16, 0.22, 0, 5);
+}
+
+.window-root.theme-light .settings-button {
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+}
+
+.window-root.theme-light .new-chat-button {
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+}
+
+.window-root.theme-light .chat-history-list .list-cell {
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-text-fill: rgba(248, 250, 252, 0.95);
+    -fx-background-insets: 5 0 5 0;
+    -fx-border-insets: 5 0 5 0;
+    -fx-padding: 0 8 0 8;
+}
+
+.window-root.theme-light .chat-history-list {
+    -fx-padding: 10 2 10 2;
+}
+
+.window-root.theme-light .chat-history-list .list-cell:empty {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-effect: null;
+    -fx-padding: 0;
+}
+
+/* Apply glass + soft shadow to all light theme buttons */
+.window-root.theme-light .button,
+.window-root.theme-light .menu-button {
+    -fx-background-color:
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0.16)),
+        rgba(255, 255, 255, 0.14);
+    -fx-background-insets: 0, 0;
+    -fx-background-radius: 999;
+    -fx-border-color: rgba(255, 255, 255, 0.42);
+    -fx-border-width: 1;
+    -fx-border-radius: 999;
+    -fx-text-fill: rgba(248, 250, 252, 0.96);
+    -fx-effect: dropshadow(gaussian, rgba(14, 18, 35, 0.20), 16, 0.22, 0, 5);
+}
+
+.window-root.theme-light .menu-button .label {
+    -fx-text-fill: rgba(248, 250, 252, 0.96);
+}
+
+.window-root.theme-light .button:hover,
+.window-root.theme-light .menu-button:hover {
+    -fx-background-color:
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.46), rgba(255, 255, 255, 0.22)),
+        rgba(255, 255, 255, 0.18);
+    -fx-border-color: rgba(255, 255, 255, 0.58);
+    -fx-effect: dropshadow(gaussian, rgba(14, 18, 35, 0.24), 20, 0.24, 0, 6);
+}
+
+.window-root.theme-light .button:pressed,
+.window-root.theme-light .menu-button:showing {
+    -fx-background-color:
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0.14)),
+        rgba(255, 255, 255, 0.12);
+    -fx-border-color: rgba(255, 255, 255, 0.44);
+    -fx-effect: innershadow(gaussian, rgba(255, 255, 255, 0.26), 10, 0.2, 0, 1);
+}
+
+.window-root.theme-light .settings-button:hover,
+.window-root.theme-light .new-chat-button:hover,
+.window-root.theme-light .chat-history-list .list-cell:filled:hover {
+    -fx-background-color:
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.46), rgba(255, 255, 255, 0.22)),
+        rgba(255, 255, 255, 0.18);
+    -fx-border-color: rgba(255, 255, 255, 0.58);
+    -fx-effect: dropshadow(gaussian, rgba(14, 18, 35, 0.24), 20, 0.24, 0, 6);
+}
+
+.window-root.theme-light .settings-button:pressed,
+.window-root.theme-light .new-chat-button:pressed,
+.window-root.theme-light .chat-history-list .list-cell:filled:selected,
+.window-root.theme-light .chat-history-list .list-cell:filled:selected:focused {
+    -fx-background-color:
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0.14)),
+        rgba(255, 255, 255, 0.12);
+    -fx-border-color: rgba(255, 255, 255, 0.44);
+    -fx-effect: innershadow(gaussian, rgba(255, 255, 255, 0.26), 10, 0.2, 0, 1);
 }
 
 /* Light mode blob gradient background */
