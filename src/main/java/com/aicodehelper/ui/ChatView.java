@@ -1,5 +1,6 @@
 package com.aicodehelper.ui;
 
+import com.aicodehelper.util.AppConfig;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -14,60 +15,80 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
 /**
- * Main chat panel containing scrollable message area and input composer.
+ * ChatView represents the main chat panel containing:
+ * - Header with theme toggle
+ * - Scrollable message area
+ * - Input composer with send button
+ * - Typing indicator
+ *
+ * Responsibilities:
+ * - Display messages with proper styling
+ * - Provide input area for user messages
+ * - Show status indicators (typing animation)
+ * - Expose components for controller wiring
+ *
+ * Design Pattern: View component in MVP architecture
+ * - Does NOT contain business logic
+ * - Purely presentational
+ * - Exposes components for external event wiring
  */
 public class ChatView extends BorderPane {
-    private final VBox messagesBox = new VBox(6);
+    private final VBox messagesBox = new VBox(AppConfig.MESSAGE_SPACING);
     private final ScrollPane scrollPane = new ScrollPane(messagesBox);
     private final TextArea inputArea = new TextArea();
-    private final Button sendIconButton = new Button("↑");
-    private final Button themeButton = new Button("Light");
-    private final Label typingLabel = new Label("AI is typing...");
-    // searchField moved to sidebar
-    // private final javafx.scene.control.TextField searchField = new javafx.scene.control.TextField();
+    private final Button sendIconButton = new Button(AppConfig.SEND_BUTTON_ICON);
+    private final Button themeButton = new Button(AppConfig.THEME_BUTTON_LIGHT_TEXT);
+    private final Label typingLabel = new Label(AppConfig.TYPING_INDICATOR_TEXT);
 
+    /**
+     * Constructs the chat view and initializes all sub-components.
+     */
     public ChatView() {
         getStyleClass().add("chat-root");
         setPadding(new Insets(16));
 
-        // top header now only contains typing label and theme button placeholder
+        // ===== HEADER: Theme toggle =====
         themeButton.getStyleClass().add("theme-button");
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
         HBox headerRow = new HBox(10, spacer, themeButton);
         headerRow.setAlignment(Pos.CENTER);
+        
+        // ===== TYPING INDICATOR =====
         typingLabel.getStyleClass().add("typing-label");
         typingLabel.setVisible(false);
         typingLabel.setManaged(false);
+        
         VBox top = new VBox(6, headerRow, typingLabel);
         setTop(top);
 
+        // ===== MESSAGE AREA =====
         messagesBox.getStyleClass().add("messages-box");
         messagesBox.setPadding(new Insets(8));
 
         scrollPane.getStyleClass().add("chat-scroll");
         scrollPane.setFitToWidth(true);
         scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
         VBox.setVgrow(scrollPane, Priority.ALWAYS);
 
         StackPane chatContainer = new StackPane(scrollPane);
         chatContainer.getStyleClass().add("chat-container");
         setCenter(chatContainer);
 
-        inputArea.setPromptText("Ask a coding question, paste code, or describe an error...");
+        // ===== INPUT AREA =====
+        inputArea.setPromptText(AppConfig.INPUT_PLACEHOLDER);
         inputArea.setWrapText(true);
         inputArea.getStyleClass().add("input-area");
-        inputArea.setPrefRowCount(2);
+        inputArea.setPrefRowCount(AppConfig.INPUT_AREA_DEFAULT_ROWS);
         inputArea.setMinHeight(72);
+        // Dynamic resize as user types
         inputArea.textProperty().addListener((obs, oldText, newText) -> resizeInput());
 
-        // Create send icon button
+        // ===== SEND BUTTON =====
         sendIconButton.getStyleClass().add("send-icon-button");
-        sendIconButton.setOnAction(e -> {
-            // This will be wired in MainLayout
-        });
 
-        // Stack the input area and send button
+        // Stack input and send button together
         StackPane inputContainer = new StackPane(inputArea, sendIconButton);
         StackPane.setAlignment(sendIconButton, Pos.CENTER_RIGHT);
         StackPane.setMargin(sendIconButton, new Insets(0, 12, 0, 0));
@@ -81,10 +102,18 @@ public class ChatView extends BorderPane {
         setBottom(inputRow);
     }
 
+    /**
+     * Dynamically resizes the input area based on content.
+     * Expands as user types more lines (up to max rows).
+     * Shrinks when content is removed.
+     */
     private void resizeInput() {
-        int lines = Math.max(1, Math.min(4, inputArea.getText().split("\\R", -1).length));
+        int lines = Math.max(AppConfig.INPUT_AREA_MIN_ROWS,
+                Math.min(AppConfig.INPUT_AREA_MAX_ROWS, inputArea.getText().split("\\R", -1).length));
         inputArea.setPrefRowCount(lines);
     }
+
+    // ========== PUBLIC API ==========
 
     public VBox getMessagesBox() {
         return messagesBox;
@@ -110,8 +139,11 @@ public class ChatView extends BorderPane {
         return typingLabel;
     }
 
+    /**
+     * Clears the input area and resets size to default.
+     */
     public void resetInput() {
         inputArea.clear();
-        inputArea.setPrefRowCount(2);
+        inputArea.setPrefRowCount(AppConfig.INPUT_AREA_DEFAULT_ROWS);
     }
 }

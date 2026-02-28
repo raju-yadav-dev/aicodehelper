@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.chatbot.controller.ChatController" styleClass="chat-root">
+    <!-- ================= MESSAGE VIEWPORT ================= -->
+    <center>
+        <VBox spacing="14" styleClass="chat-main" BorderPane.alignment="CENTER">
+            <padding>
+                <Insets top="16" right="22" bottom="10" left="22" />
+            </padding>
+            <!-- Subsection: Scrollable Message List -->
+            <ScrollPane fx:id="scrollPane" fitToWidth="true" styleClass="messages-scroll" VBox.vgrow="ALWAYS">
+                <VBox fx:id="messageBox" spacing="10" styleClass="messages-list">
+                    <padding>
+                        <Insets top="2" right="2" bottom="2" left="2" />
+                    </padding>
+                </VBox>
+            </ScrollPane>
+        </VBox>
+    </center>
+
+    <!-- ================= COMPOSER ================= -->
+    <bottom>
+        <VBox styleClass="composer-host">
+            <padding>
+                <Insets top="4" right="22" bottom="18" left="22" />
+            </padding>
+            <!-- Subsection: Input + Send Action -->
+            <HBox fx:id="inputShell" styleClass="input-shell" alignment="CENTER_LEFT" spacing="10">
+                <TextArea fx:id="inputArea" prefRowCount="1" wrapText="true" promptText="Message ChatBot..." HBox.hgrow="ALWAYS" />
+                <Button fx:id="sendButton" text="&#8593;" focusTraversable="false" styleClass="send-button" />
+            </HBox>
+        </VBox>
+    </bottom>
+</BorderPane>

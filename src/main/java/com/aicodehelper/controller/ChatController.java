@@ -1,210 +1,188 @@
 package com.aicodehelper.controller;
 
+import com.aicodehelper.model.Conversation;
 import com.aicodehelper.model.Message;
+import com.aicodehelper.service.ChatService;
+import com.aicodehelper.service.ConversationManager;
+import com.aicodehelper.util.AppConfig;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
-import java.util.regex.Pattern;
+import java.util.Optional;
 
 /**
- * Controller handling chat data and placeholder AI logic.
+ * ChatController acts as the bridge between UI layer and business logic.
+ *
+ * Responsibilities:
+ * - Manage conversation lifecycle (create, switch, delete)
+ * - Delegate message generation to ChatService
+ * - Maintain conversation state through ConversationManager
+ * - Provide conversation history for UI display
+ *
+ * Architecture: Follows MVP pattern where:
+ * - View: MainLayout, ChatView, SidebarView
+ * - Controller: This class (ChatController)
+ * - Model: Message, Conversation
+ * - Service: ChatService, ConversationManager
+ *
+ * This separation ensures:
+ * - Easy unit testing (services can be mocked)
+ * - Clean dependency injection path
+ * - Clear separation of concerns
+ * - Reusability of business logic
  */
 public class ChatController {
-    private static final Pattern CODE_HINT_PATTERN = Pattern.compile(
-            "(?s)(class\\s+\\w+|public\\s+static\\s+void\\s+main|\\{.*}|;|def\\s+\\w+|function\\s+\\w+|#include\\s*<)");
-    private static final Pattern JAVA_PATTERN = Pattern.compile("(?i)(public\\s+class|System\\.out|import\\s+java\\.)");
-    private static final Pattern PYTHON_PATTERN = Pattern.compile("(?i)(def\\s+\\w+\\(|print\\(|import\\s+\\w+|:\\s*$)");
-    private static final Pattern JS_PATTERN = Pattern.compile("(?i)(function\\s+\\w+|const\\s+\\w+|let\\s+\\w+|=>)");
-    private static final Pattern CPP_PATTERN = Pattern.compile("(?i)(#include\\s*<|std::|int\\s+main\\s*\\()");
+    private final ChatService chatService;
+    private final ConversationManager conversationManager;
 
-    private final List<String> chatHistory = new ArrayList<>();
-    private final List<Message> messages = new ArrayList<>();
-    private boolean hasAddedToHistory = false;
+    /**
+     * Constructor initializing services.
+     * Services can be injected here for testing/dependency injection.
+     */
+    public ChatController() {
+        this.chatService = new ChatService();
+        this.conversationManager = new ConversationManager();
+    }
 
+    /**
+     * Constructor for dependency injection (useful for testing).
+     * @param chatService The AI response service
+     * @param conversationManager The conversation manager service
+     */
+    public ChatController(ChatService chatService, ConversationManager conversationManager) {
+        this.chatService = chatService;
+        this.conversationManager = conversationManager;
+    }
+
+    // ========== CONVERSATION MANAGEMENT ==========
+
+    /**
+     * Creates a new conversation and sets it as current.
+     * Called when user clicks "New Chat" button.
+     */
     public void startNewChat() {
-        messages.clear();
-        hasAddedToHistory = false;
+        String title = AppConfig.NEW_CHAT_DEFAULT_TITLE;
+        conversationManager.createNewConversation(title);
     }
 
-    public List<String> getChatHistory() {
-        return chatHistory;
+    /**
+     * Switches to an existing conversation by index.
+     * @param index Position in the conversation list
+     */
+    public void switchToConversation(int index) {
+        List<Conversation> conversations = conversationManager.getAllConversations();
+        if (index >= 0 && index < conversations.size()) {
+            conversationManager.setCurrentConversation(conversations.get(index));
+        }
     }
 
-    public List<Message> getMessages() {
-        return messages;
+    /**
+     * Gets the currently active conversation.
+     * @return Optional containing the current conversation
+     */
+    public Optional<Conversation> getCurrentConversation() {
+        return conversationManager.getCurrentConversation();
     }
 
+    /**
+     * Deletes a conversation from history.
+     * @param index Position in the conversation list
+     */
+    public void deleteConversation(int index) {
+        List<Conversation> conversations = conversationManager.getAllConversations();
+        if (index >= 0 && index < conversations.size()) {
+            conversationManager.deleteConversation(conversations.get(index));
+        }
+    }
+
+    // ========== MESSAGE MANAGEMENT ==========
+
+    /**
+     * Creates a user message and adds it to the current conversation.
+     * Also updates the conversation title if it's the first message.
+     * @param input The user's message text
+     * @return The created user message
+     */
     public Message createUserMessage(String input) {
-        Message message = new Message(Message.Sender.USER, input, LocalDateTime.now(), false);
-        if (!hasAddedToHistory) {
-            String title = generateChatTitle(input);
-            chatHistory.add(0, title);
-            hasAddedToHistory = true;
+        if (input == null || input.isBlank()) {
+            throw new IllegalArgumentException(AppConfig.EMPTY_INPUT_WARNING);
         }
-        return message;
+
+        Message userMessage = new Message(Message.Sender.USER, input.trim(), LocalDateTime.now(), false);
+        
+        Optional<Conversation> current = getCurrentConversation();
+        if (current.isEmpty()) {
+            startNewChat();
+            current = getCurrentConversation();
+        }
+
+        current.ifPresent(conversation -> {
+            conversation.addMessage(userMessage);
+        });
+
+        return userMessage;
     }
 
-    public Message createBotReply(String input) {
-        String trimmed = input == null ? "" : input.trim();
-        String lower = trimmed.toLowerCase(Locale.ROOT);
+    /**
+     * Generates an AI response and adds it to the current conversation.
+     * Uses ChatService to generate context-aware responses.
+     * @param userInput The original user input (for context)
+     * @return The generated bot message
+     */
+    public Message createBotReply(String userInput) {
+        Message botMessage = chatService.generateResponse(userInput);
+        
+        Optional<Conversation> current = getCurrentConversation();
+        current.ifPresent(conversation -> {
+            conversation.addMessage(botMessage);
+        });
 
-        if (containsCode(trimmed)) {
-            return new Message(Message.Sender.BOT, buildCodeReviewResponse(trimmed), LocalDateTime.now(), false);
-        }
-
-        if (lower.contains("error")) {
-            return new Message(Message.Sender.BOT, buildErrorResponse(trimmed, lower), LocalDateTime.now(), false);
-        }
-
-        String response = """
-                ## Quick Guidance
-                I can explain concepts, review snippets, and guide debugging in beginner-friendly steps.
-
-                ### Try One of These
-                - Paste code and ask: "What does this do?"
-                - Paste an error and ask: "Why is this failing?"
-                - Ask for a beginner roadmap: "How do I learn Java OOP?"
-
-                ### Better Prompt Template
-                - Goal: what you want the code to do
-                - Current behavior: what actually happens
-                - Constraints: language, deadline, or style requirement
-                """;
-        return new Message(Message.Sender.BOT, response, LocalDateTime.now(), false);
+        return botMessage;
     }
 
-    private boolean containsCode(String text) {
-        return text != null && CODE_HINT_PATTERN.matcher(text).find();
+    /**
+     * Gets all messages from the current conversation.
+     * @return List of messages in conversation order
+     */
+    public List<Message> getCurrentMessages() {
+        return getCurrentConversation()
+                .map(Conversation::getMessages)
+                .orElse(List.of());
     }
 
-    private String buildCodeReviewResponse(String codeInput) {
-        String language = detectLanguage(codeInput);
-        int lineCount = codeInput.split("\\R", -1).length;
-        int charCount = codeInput.length();
-        String complexity = lineCount > 25 ? "moderate" : "low";
+    // ========== HISTORY & DISPLAY ==========
 
-        return """
-                ## Code Review Summary
-                I detected a `%s` snippet with `%d` lines and `%d` characters.
-
-                ### What Looks Good
-                - You already have a concrete structure to solve a real problem.
-                - The logic is decomposed into readable operations.
-
-                ### Improvement Opportunities
-                - Add clearer variable names for beginners who read this later.
-                - Validate edge cases before core logic (null, empty, invalid values).
-                - Keep each method focused on one job to reduce bug risk.
-
-                ### Suggested Next Step
-                - Run 3 tests: one normal input, one boundary input, one invalid input.
-                - Expected complexity: `%s` for beginner maintenance.
-
-                ### Example Refactor Pattern
-                ```%s
-                // 1) validate input
-                // 2) compute result in a small method
-                // 3) print/return output separately
-                ```
-                """.formatted(language, lineCount, charCount, complexity, language);
+    /**
+     * Gets conversation titles for the sidebar history list.
+     * Returns titles in reverse chronological order (most recent first).
+     * @return List of conversation titles
+     */
+    public List<String> getChatHistory() {
+        return conversationManager.getConversationTitles();
     }
 
-    private String buildErrorResponse(String original, String lower) {
-        String focusedHint = "Check stack trace and the exact failing line first.";
-        if (lower.contains("nullpointer")) {
-            focusedHint = "A reference is null before usage. Initialize it or guard with a null-check.";
-        } else if (lower.contains("indexoutofbounds")) {
-            focusedHint = "You are accessing an index outside collection limits. Validate index boundaries.";
-        } else if (lower.contains("syntax")) {
-            focusedHint = "A token is missing or misplaced. Re-check brackets, semicolons, and method signatures.";
-        }
-
-        return """
-                ## Error Diagnosis
-                I can help you fix this quickly.
-
-                ### First Interpretation
-                - %s
-                - Keep only one change per run so the root cause stays visible.
-
-                ### Fast Fix Checklist
-                - Read the first error in the console, not only the last one.
-                - Confirm imports, variable types, and method signatures.
-                - Add temporary print/log lines right before the failing line.
-                - Re-run with a minimal input that reproduces the issue.
-
-                ### Share This for Better Help
-                - Language + framework
-                - Full error text
-                - The 10-20 lines around the failing code
-
-                ### Your Message Snapshot
-                `%s`
-                """.formatted(focusedHint, summarizeForInlineCode(original));
+    /**
+     * Gets the number of conversations.
+     * @return conversation count
+     */
+    public int getConversationCount() {
+        return conversationManager.getConversationCount();
     }
 
-    private String detectLanguage(String code) {
-        if (JAVA_PATTERN.matcher(code).find()) {
-            return "java";
-        }
-        if (PYTHON_PATTERN.matcher(code).find()) {
-            return "python";
-        }
-        if (JS_PATTERN.matcher(code).find()) {
-            return "javascript";
-        }
-        if (CPP_PATTERN.matcher(code).find()) {
-            return "cpp";
-        }
-        return "text";
+    /**
+     * Clears all conversations (usually on app shutdown or reset).
+     * WARNING: This action is not reversible unless persistence is implemented.
+     */
+    public void clearAllConversations() {
+        conversationManager.clear();
     }
 
-    private String generateChatTitle(String input) {
-        String trimmed = input.trim();
-        if (trimmed.isEmpty()) {
-            return "New Chat";
-        }
-
-        // Try to extract a meaningful title from the first sentence or question
-        String[] sentences = trimmed.split("[.!?]");
-        String firstSentence = sentences.length > 0 ? sentences[0].trim() : trimmed;
-
-        // If it's a question starting with common words, include them
-        if (firstSentence.toLowerCase().startsWith("how") ||
-            firstSentence.toLowerCase().startsWith("what") ||
-            firstSentence.toLowerCase().startsWith("why") ||
-            firstSentence.toLowerCase().startsWith("can") ||
-            firstSentence.toLowerCase().startsWith("help")) {
-            if (firstSentence.length() <= 50) {
-                return firstSentence;
-            }
-            return firstSentence.substring(0, 47) + "...";
-        }
-
-        // For code or other content, take first meaningful part
-        if (firstSentence.length() <= 50) {
-            return firstSentence;
-        }
-
-        // Find a good break point (space) near 47 chars
-        int breakPoint = 47;
-        while (breakPoint > 30 && firstSentence.charAt(breakPoint) != ' ') {
-            breakPoint--;
-        }
-        if (breakPoint <= 30) {
-            breakPoint = 47;
-        }
-
-        return firstSentence.substring(0, breakPoint) + "...";
-    }
-
-    private String summarizeForInlineCode(String value) {
-        String normalized = value.replaceAll("\\s+", " ").trim();
-        if (normalized.length() <= 90) {
-            return normalized;
-        }
-        return normalized.substring(0, 87) + "...";
+    /**
+     * For backward compatibility with existing UI code.
+     * Returns messages from current conversation.
+     * @return list of messages
+     */
+    public List<Message> getMessages() {
+        return getCurrentMessages();
     }
 }

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<StackPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.chatbot.controller.MainController" fx:id="windowRoot" styleClass="window-root">
+    <BorderPane fx:id="appShell" styleClass="app-shell">
+        <!-- ================= TITLE BAR ================= -->
+        <top>
+            <HBox fx:id="titleBar" styleClass="title-bar" alignment="CENTER_LEFT" spacing="10">
+                <padding>
+                    <Insets top="8" right="10" bottom="8" left="10" />
+                </padding>
+
+                <Label text="ChatBot" styleClass="titlebar-label" />
+
+                <Region HBox.hgrow="ALWAYS" />
+
+                <!-- Subsection: Settings + Native Window Buttons -->
+                <HBox spacing="8" alignment="CENTER_RIGHT" styleClass="window-controls">
+                    <MenuButton fx:id="settingsButton" text="Settings" styleClass="settings-button" focusTraversable="false">
+                        <items>
+                            <RadioMenuItem fx:id="themeDarkItem" text="GitHub Dark (Default)" selected="true" />
+                            <RadioMenuItem fx:id="themeLightItem" text="GitHub Light" />
+                        </items>
+                    </MenuButton>
+                    <Button fx:id="minimizeButton" text="&#8211;" styleClass="title-control" focusTraversable="false" />
+                    <Button fx:id="maximizeButton" text="&#9633;" styleClass="title-control" focusTraversable="false" />
+                    <Button fx:id="closeButton" text="&#10005;" styleClass="title-control" focusTraversable="false" />
+                </HBox>
+            </HBox>
+        </top>
+
+        <!-- ================= SIDEBAR ================= -->
+        <left>
+            <VBox fx:id="sidebar" spacing="14" styleClass="sidebar">
+                <padding>
+                    <Insets top="20" right="14" bottom="16" left="14" />
+                </padding>
+                <Button fx:id="newChatButton" text="+ New Chat" styleClass="new-chat-button" maxWidth="Infinity" />
+                <ListView fx:id="chatList" VBox.vgrow="ALWAYS" />
+            </VBox>
+        </left>
+
+        <!-- ================= CHAT CONTENT HOST ================= -->
+        <center>
+            <VBox fx:id="chatContainer" styleClass="content-root">
+                <!-- Chat area injected by controller -->
+            </VBox>
+        </center>
+    </BorderPane>
+</StackPane>

@@ -414,9 +414,9 @@
 }
 
 .input-area:focused {
-    -fx-background-color: rgba(22, 26, 50, 0.9);
-    -fx-border-color: rgba(124, 58, 237, 0.4);
-    -fx-effect: dropshadow(gaussian, rgba(124, 58, 237, 0.3), 14, 0.3, 0, 2);
+    -fx-background-color: rgba(22, 26, 50, 0.8);
+    -fx-border-color: rgba(255, 255, 255, 0.05);
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 12, 0.2, 0, 2);
     -fx-focus-color: transparent;
     -fx-faint-focus-color: transparent;
 }
@@ -527,7 +527,7 @@
 .app-root.light-mode .text-field:focused,
 .app-root.light-mode .text-area:focused,
 .app-root.light-mode .input-area:focused {
-    -fx-border-color: rgba(124, 58, 237, 0.3);
+    -fx-border-color: rgba(99, 102, 241, 0.15);
 }
 
 .app-root.light-mode .theme-button {

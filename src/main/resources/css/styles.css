@@ -1,0 +1,443 @@
+.root {
+    -fx-font-family: "Segoe UI", "Inter", sans-serif;
+}
+
+/* ================= BASE TOKENS / DEFAULTS ================= */
+.window-root {
+    -app-bg: #0d1117;
+    -app-surface: #161b22;
+    -app-border: #30363d;
+    -app-accent: #2f81f7;
+    -app-accent-hover: #1f6feb;
+    -app-accent-pressed: #1158c7;
+    -app-text-primary: #e6edf3;
+    -app-text-secondary: #8b949e;
+    -app-muted-hover: rgba(139, 148, 158, 0.22);
+    -fx-accent: -app-accent;
+    -fx-background-color: transparent;
+    -fx-padding: 10;
+}
+
+/* ================= DARK THEME ================= */
+.window-root.theme-dark {
+    /* surfaces */
+    -app-bg: #0d1117;
+    -app-surface: #161b22;
+    -app-surface-elevated: #21262d;
+    -app-border: #30363d;
+
+    /* accent */
+    -app-accent: #238636;
+    -app-accent-hover: #2ea043;
+    -app-accent-pressed: #196c2e;
+
+    /* text */
+    -app-text-primary: #e6edf3;
+    -app-text-secondary: #8b949e;
+    -app-text-muted: #6e7681;
+
+    /* states */
+    -app-muted-hover: rgba(139, 148, 158, 0.22);
+    -app-focus-ring: rgba(46, 160, 67, 0.35);
+}
+
+/* ================= LIGHT THEME ================= */
+.window-root.theme-light {
+    /* surfaces */
+    -app-bg: #ffffff;
+    -app-surface: #f6f8fa;
+    -app-surface-elevated: #ffffff;
+    -app-border: #d0d7de;
+
+    /* accent */
+    -app-accent: #2da44e;
+    -app-accent-hover: #2c974b;
+    -app-accent-pressed: #298e46;
+
+    /* text */
+    -app-text-primary: #1f2328;
+    -app-text-secondary: #57606a;
+    -app-text-muted: #6e7781;
+
+    /* states */
+    -app-muted-hover: rgba(87, 96, 106, 0.15);
+    -app-focus-ring: rgba(45, 164, 78, 0.35);
+}
+
+.window-root.maximized {
+    -fx-padding: 0;
+}
+
+/* ================= WINDOW SHELL ================= */
+.app-shell {
+    -fx-background-color: -app-bg;
+    -fx-background-radius: 16;
+    -fx-border-color: -app-border;
+    -fx-border-width: 1;
+    -fx-border-radius: 16;
+    -fx-effect: dropshadow(gaussian, rgba(2, 6, 23, 0.6), 24, 0.2, 0, 10);
+}
+
+.app-shell.maximized {
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
+}
+
+/* ================= TITLE BAR / WINDOW CONTROLS ================= */
+.title-bar {
+    -fx-background-color: -app-surface;
+    -fx-border-color: transparent transparent -app-border transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+.titlebar-label {
+    -fx-text-fill: -app-text-primary;
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+    -fx-padding: 0 0 0 4;
+}
+
+.window-controls {
+    -fx-background-color: transparent;
+    -fx-alignment: center-right;
+    -fx-font-size: 1em;
+    -fx-font-weight: 800;
+}
+
+.settings-button {
+    -fx-background-color: -app-surface;
+    -fx-border-color: -app-border;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-text-fill: -app-text-primary;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-padding: 6 10 6 10;
+    -fx-cursor: hand;
+}
+
+.settings-button:hover {
+    -fx-background-color: -app-muted-hover;
+}
+
+.settings-button:showing {
+    -fx-background-color: -app-muted-hover;
+}
+
+.settings-button .label {
+    -fx-text-fill: -app-text-primary;
+}
+
+.context-menu {
+    -fx-background-color: -app-surface;
+    -fx-border-color: -app-border;
+    -fx-border-width: 1;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+}
+
+.menu-item,
+.radio-menu-item {
+    -fx-background-color: transparent;
+}
+
+.menu-item .label,
+.radio-menu-item .label {
+    -fx-text-fill: -app-text-primary;
+}
+
+.menu-item:focused,
+.radio-menu-item:focused {
+    -fx-background-color: -app-muted-hover;
+}
+
+.title-control {
+    -fx-min-width: 52;
+    -fx-pref-width: 52;
+    -fx-min-height: 34;
+    -fx-pref-height: 34;
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-text-fill: -app-text-primary;
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-cursor: hand;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+.title-control:hover {
+    -fx-background-color: -app-muted-hover;
+    -fx-text-fill: -app-text-primary;
+}
+
+.title-control:pressed {
+    -fx-background-color: -app-muted-hover;
+}
+
+.title-control:focused {
+    -fx-background-color: transparent;
+}
+
+.close-control {
+    -fx-background-color: transparent, transparent, transparent;
+    -fx-background-insets: 0, 0, 0;
+    -fx-background-radius: 8, 8, 8;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+}
+
+.close-control:focused,
+.close-control:armed {
+    -fx-background-color: transparent, transparent, transparent;
+    -fx-background-insets: 0, 0, 0;
+}
+
+.close-control:hover {
+    -fx-background-color: transparent, transparent, transparent;
+    -fx-text-fill: -app-text-primary;
+}
+
+.close-control:pressed {
+    -fx-background-color: transparent, transparent, transparent;
+}
+
+/* ================= APP LAYOUT ================= */
+.app-root,
+.content-root,
+.chat-root,
+.chat-main {
+    -fx-background-color: -app-bg;
+}
+
+/* ================= SIDEBAR / CHAT LIST ================= */
+.sidebar {
+    -fx-min-width: 220;
+    -fx-pref-width: 260;
+    -fx-background-color: -app-surface;
+    -fx-border-color: transparent -app-border transparent transparent;
+    -fx-border-width: 0 1 0 0;
+}
+
+.new-chat-button {
+    -fx-max-width: Infinity;
+    -fx-background-color: -app-surface-elevated;
+    -fx-border-color: -app-border;
+    -fx-border-width: 1;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-text-fill: -app-text-primary;
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+    -fx-padding: 10 14 10 14;
+    -fx-cursor: hand;
+}
+
+.new-chat-button:hover {
+    -fx-background-color: -app-muted-hover;
+    -fx-border-color: -app-border;
+}
+
+.new-chat-button:pressed {
+    -fx-background-color: -app-muted-hover;
+}
+
+.list-view {
+    -fx-background-color: -app-bg;
+    -fx-control-inner-background: transparent;
+    -fx-border-color: -app-border;
+    -fx-border-width: 1;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-padding: 8;
+}
+
+.list-view .viewport,
+.list-view .corner {
+    -fx-background-color: transparent;
+}
+
+.list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: -app-text-secondary;
+    -fx-font-size: 13px;
+    -fx-padding: 10 10 10 10;
+    -fx-background-radius: 10;
+}
+
+.list-cell:filled:hover {
+    -fx-background-color: -app-muted-hover;
+    -fx-text-fill: -app-text-primary;
+}
+
+.list-cell:filled:selected,
+.list-cell:filled:selected:focused {
+    -fx-background-color: -app-muted-hover;
+    -fx-text-fill: -app-text-primary;
+    -fx-border-color: transparent transparent transparent -app-text-muted;
+    -fx-border-width: 0 0 0 2;
+}
+
+/* ================= MESSAGE AREA ================= */
+.messages-scroll {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 0 2 0 2;
+}
+
+.messages-scroll > .viewport,
+.messages-scroll .corner {
+    -fx-background-color: transparent;
+}
+
+.messages-list {
+    -fx-fill-width: true;
+}
+
+.message-row {
+    -fx-padding: 3 0 3 0;
+}
+
+.message-bubble {
+    -fx-background-radius: 14;
+    -fx-padding: 11 14 11 14;
+    -fx-max-width: 560;
+}
+
+.bot-bubble {
+    -fx-background-color: -app-surface;
+    -fx-border-color: -app-border;
+    -fx-border-width: 1;
+    -fx-border-radius: 14;
+}
+
+.user-bubble {
+    -fx-background-color: -app-accent;
+}
+
+.message-text {
+    -fx-text-fill: -app-text-primary;
+    -fx-font-size: 14px;
+    -fx-line-spacing: 1px;
+}
+
+/* ================= COMPOSER / INPUT ================= */
+.composer-host {
+    -fx-background-color: transparent;
+}
+
+.input-shell {
+    -fx-background-color: -app-surface;
+    -fx-border-color: linear-gradient(to right, #3b82f6 0%, #7c3aed 25%, #ec4899 50%, #ef4444 75%, #22c55e 100%);
+    -fx-border-width: 1;
+    -fx-border-radius: 999;
+    -fx-background-radius: 999;
+    -fx-padding: 10 12 10 14;
+    -fx-effect: dropshadow(gaussian, rgba(124, 58, 237, 0.18), 10, 0.2, 0, 0);
+}
+
+.input-shell:hover {
+    -fx-effect: dropshadow(gaussian, rgba(236, 72, 153, 0.28), 14, 0.24, 0, 0);
+}
+
+.input-shell.input-focused {
+    -fx-border-width: 1.4;
+    -fx-effect: dropshadow(gaussian, rgba(168, 85, 247, 0.45), 22, 0.28, 0, 0);
+}
+
+.text-area {
+    -fx-font-size: 14px;
+    -fx-padding: 0;
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-border-color: transparent;
+    -fx-text-fill: -app-text-primary;
+    -fx-highlight-fill: -app-accent;
+    -fx-highlight-text-fill: #ffffff;
+    -fx-prompt-text-fill: -app-text-secondary;
+}
+
+.text-area .content {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+}
+
+.text-area .viewport,
+.text-area .scroll-pane,
+.text-area .scroll-pane .viewport,
+.text-area .scroll-pane .content {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+}
+
+.input-shell .text-area .scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-pref-width: 12;
+    -fx-padding: 2 0 2 0;
+}
+
+.input-shell .text-area .scroll-bar:vertical .track {
+    -fx-background-color: rgba(148, 163, 184, 0.25);
+    -fx-background-radius: 999;
+    -fx-border-radius: 999;
+}
+
+.input-shell .text-area .scroll-bar:vertical .thumb {
+    -fx-background-color: #94a3b8;
+    -fx-background-insets: 1;
+    -fx-background-radius: 999;
+    -fx-border-radius: 999;
+}
+
+.input-shell .text-area .scroll-bar:vertical .thumb:hover {
+    -fx-background-color: #a6b4c8;
+}
+
+.input-shell .text-area .scroll-bar:vertical .increment-button,
+.input-shell .text-area .scroll-bar:vertical .decrement-button,
+.input-shell .text-area .scroll-bar:vertical .increment-arrow,
+.input-shell .text-area .scroll-bar:vertical .decrement-arrow {
+    -fx-padding: 0;
+    -fx-opacity: 0;
+    -fx-background-color: transparent;
+}
+
+.text-area:focused {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+/* ================= SEND BUTTON ================= */
+.send-button {
+    -fx-min-width: 36;
+    -fx-pref-width: 36;
+    -fx-min-height: 36;
+    -fx-pref-height: 36;
+    -fx-background-radius: 999;
+    -fx-background-color: -app-accent;
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 16px;
+    -fx-font-weight: 700;
+    -fx-padding: 0;
+    -fx-cursor: hand;
+}
+
+.send-button:hover {
+    -fx-background-color: -app-accent-hover;
+}
+
+.send-button:pressed {
+    -fx-background-color: -app-accent-pressed;
+}
+
+.send-button:disabled {
+    -fx-background-color: #334155;
+    -fx-text-fill: #94a3b8;
+    -fx-opacity: 1;
+}

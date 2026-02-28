@@ -2,11 +2,18 @@ package com.aicodehelper.ui;
 
 import com.aicodehelper.controller.ChatController;
 import com.aicodehelper.model.Message;
+import com.aicodehelper.util.AppConfig;
+import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
+import javafx.animation.ParallelTransition;
 import javafx.animation.Timeline;
+import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
@@ -18,126 +25,248 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 
 /**
- * Composes UI components and binds them to controller behavior.
+ * MainLayout orchestrates the application UI structure and wires controller logic.
+ *
+ * Responsibilities:
+ * - Compose layout (sidebar | divider | chat area)
+ * - Wire UI events to controller methods
+ * - Manage message rendering and animations
+ * - Handle keyboard shortcuts (Enter to send, Shift+Enter for newline)
+ * - Implement theme switching (dark/light mode)
+ * - Coordinate responsive window sizing
+ *
+ * Architecture: Follows MVP pattern as the View layer:
+ * - Binds UI actions to controller methods
+ * - Displays controller state changes
+ * - Delegates business logic to ChatController
+ *
+ * Best Practices:
+ * - Methods are focused and single-responsibility
+ * - UI updates use Platform.runLater for thread safety
+ * - Animations provide visual feedback without blocking UI
+ * - CSS classes allow easy styling changes
  */
 public class MainLayout {
     private final ChatController chatController = new ChatController();
     private final SidebarView sidebarView = new SidebarView();
     private final ChatView chatView = new ChatView();
     private BorderPane root;
+    private Stage stage;
 
+    /**
+     * Initializes the application UI and wires all event handlers.
+     * @param stage The primary JavaFX stage
+     */
     public void init(Stage stage) {
+        this.stage = stage;
+        buildLayout();
+        wireActions();
+        setupStage();
+        
+        // Create initial chat
+        chatController.startNewChat();
+        refreshHistory();
+    }
+
+    /**
+     * Constructs the main layout structure:
+     * [Sidebar | Divider | Chat Area]
+     */
+    private void buildLayout() {
         root = new BorderPane();
         root.getStyleClass().add("app-root");
 
+        // Divider between sidebar and chat
         Region divider = new Region();
         divider.getStyleClass().add("divider");
         divider.setPrefWidth(1);
 
+        // Main layout container
         HBox centerContainer = new HBox(sidebarView, divider, chatView);
         HBox.setHgrow(chatView, Priority.ALWAYS);
         centerContainer.setMinSize(0, 0);
 
         root.setCenter(centerContainer);
         root.setMinSize(0, 0);
-
-        javafx.geometry.Rectangle2D visualBounds = Screen.getPrimary().getVisualBounds();
-        double sceneWidth = Math.min(1200, Math.max(900, visualBounds.getWidth() * 0.9));
-        double sceneHeight = Math.min(760, Math.max(620, visualBounds.getHeight() * 0.9));
-        Scene scene = new Scene(root, sceneWidth, sceneHeight);
-        scene.getStylesheets().add(MainLayout.class.getResource("/styles/app.css").toExternalForm());
-
-        wireActions();
-        chatController.startNewChat();
-        refreshHistory();
-
-        stage.setTitle("Cortex");
-        stage.setScene(scene);
-        stage.setMinWidth(780);
-        stage.setMinHeight(540);
-        stage.setMaxWidth(visualBounds.getWidth());
-        stage.setMaxHeight(visualBounds.getHeight());
-        stage.show();
     }
 
+    /**
+     * Wires all UI component event handlers to controller methods.
+     * This is where user interactions are connected to business logic.
+     */
     private void wireActions() {
-        sidebarView.getNewChatButton().setOnAction(e -> {
-            chatController.startNewChat();
-            chatView.getMessagesBox().getChildren().clear();
-            refreshHistory();
-        });
+        // New Chat button
+        sidebarView.getNewChatButton().setOnAction(e -> handleNewChat());
 
+        // Chat send functionality
         chatView.getSendIconButton().setOnAction(e -> sendMessage());
+        
+        // Theme toggle
         chatView.getThemeButton().setOnAction(e -> toggleTheme());
+
+        // Keyboard input: Enter to send, Shift+Enter for newline
         chatView.getInputArea().addEventFilter(KeyEvent.KEY_PRESSED, event -> {
             if (event.getCode() == KeyCode.ENTER && !event.isShiftDown()) {
                 sendMessage();
                 event.consume();
             }
         });
+
+        // Sidebar history: switch conversations on click
+        sidebarView.getHistoryView().setOnMouseClicked(event -> {
+            int selectedIndex = sidebarView.getHistoryView().getSelectionModel().getSelectedIndex();
+            if (selectedIndex >= 0) {
+                chatController.switchToConversation(selectedIndex);
+                loadCurrentConversation();
+            }
+        });
     }
 
+    /**
+     * Configures the stage (window) properties.
+     */
+    private void setupStage() {
+        Rectangle2D visualBounds = Screen.getPrimary().getVisualBounds();
+        double sceneWidth = AppConfig.calculateResponsiveWidth(visualBounds.getWidth());
+        double sceneHeight = AppConfig.calculateResponsiveHeight(visualBounds.getHeight());
+
+        Scene scene = new Scene(root, sceneWidth, sceneHeight);
+        scene.getStylesheets().add(getClass().getResource(AppConfig.CSS_RESOURCE_PATH).toExternalForm());
+
+        stage.setTitle(AppConfig.APP_NAME);
+        stage.setScene(scene);
+        stage.setMinWidth(AppConfig.MIN_WINDOW_WIDTH);
+        stage.setMinHeight(AppConfig.MIN_WINDOW_HEIGHT);
+        stage.setMaxWidth(visualBounds.getWidth());
+        stage.setMaxHeight(visualBounds.getHeight());
+        stage.show();
+    }
+
+    // ========== EVENT HANDLERS ==========
+
+    /**
+     * Handles "New Chat" button click.
+     * Creates new conversation and refreshes UI.
+     */
+    private void handleNewChat() {
+        chatController.startNewChat();
+        chatView.getMessagesBox().getChildren().clear();
+        refreshHistory();
+    }
+
+    /**
+     * Handles send button click or Enter key press.
+     * Extracts input, creates message, animates response.
+     */
     private void sendMessage() {
         String input = chatView.getInputArea().getText();
         if (input == null || input.isBlank()) {
             return;
         }
 
-        Message userMessage = chatController.createUserMessage(input.trim());
-        chatController.getMessages().add(userMessage);
-        addMessageBubble(userMessage);
+        try {
+            // Create and display user message
+            Message userMessage = chatController.createUserMessage(input.trim());
+            addMessageBubble(userMessage);
+            chatView.resetInput();
 
-        chatView.resetInput();
-        runTypingAnimation(() -> {
-            Message botMessage = chatController.createBotReply(input);
-            chatController.getMessages().add(botMessage);
-            addMessageBubble(botMessage);
-        });
+            // Update conversation title if first message
+            chatController.getCurrentConversation().ifPresent(conv -> {
+                if (conv.getMessageCount() == 1) {
+                    conv.getMessages().get(0);
+                }
+            });
+
+            // Show typing animation and generate response
+            runTypingAnimation(() -> {
+                Message botMessage = chatController.createBotReply(input);
+                addMessageBubble(botMessage);
+            });
+
+        } catch (IllegalArgumentException e) {
+            showTemporaryStatus(e.getMessage());
+        }
     }
 
+    /**
+     * Toggles between dark and light themes.
+     */
+    private void toggleTheme() {
+        boolean lightMode = root.getStyleClass().contains(AppConfig.LIGHT_MODE_CLASS);
+        if (lightMode) {
+            root.getStyleClass().remove(AppConfig.LIGHT_MODE_CLASS);
+            chatView.getThemeButton().setText(AppConfig.THEME_BUTTON_LIGHT_TEXT);
+        } else {
+            root.getStyleClass().add(AppConfig.LIGHT_MODE_CLASS);
+            chatView.getThemeButton().setText(AppConfig.THEME_BUTTON_DARK_TEXT);
+        }
+    }
+
+    // ========== UI UPDATES ==========
+
+    /**
+     * Adds a message bubble to the chat view with slide-in animation.
+     */
     private void addMessageBubble(Message message) {
         ChatBubble bubble = new ChatBubble(message, copiedText -> {
-            javafx.scene.input.Clipboard clipboard = javafx.scene.input.Clipboard.getSystemClipboard();
-            javafx.scene.input.ClipboardContent content = new javafx.scene.input.ClipboardContent();
+            Clipboard clipboard = Clipboard.getSystemClipboard();
+            ClipboardContent content = new ClipboardContent();
             content.putString(copiedText);
             clipboard.setContent(content);
-            showTemporaryStatus("Copied to clipboard");
+            showTemporaryStatus(AppConfig.COPIED_CONFIRMATION_TEXT);
         });
 
-        // start invisible and slightly shifted
+        // Start invisible and slightly offset
         bubble.setOpacity(0);
         bubble.setTranslateY(10);
 
         chatView.getMessagesBox().getChildren().add(bubble);
 
-        // animation
-        javafx.animation.FadeTransition fade = new javafx.animation.FadeTransition(javafx.util.Duration.millis(300), bubble);
+        // Animate in with fade + slide
+        FadeTransition fade = new FadeTransition(Duration.millis(AppConfig.MESSAGE_ANIMATION_DURATION_MS), bubble);
         fade.setToValue(1);
-        javafx.animation.TranslateTransition slide = new javafx.animation.TranslateTransition(javafx.util.Duration.millis(300), bubble);
+        
+        TranslateTransition slide = new TranslateTransition(Duration.millis(AppConfig.MESSAGE_ANIMATION_DURATION_MS), bubble);
         slide.setToY(0);
-        javafx.animation.ParallelTransition pt = new javafx.animation.ParallelTransition(fade, slide);
-        pt.setOnFinished(e -> autoScrollToBottom());
-        pt.play();
+        
+        ParallelTransition parallel = new ParallelTransition(fade, slide);
+        parallel.setOnFinished(e -> autoScrollToBottom());
+        parallel.play();
     }
 
+    /**
+     * Loads messages from current conversation into the chat view.
+     */
+    private void loadCurrentConversation() {
+        chatView.getMessagesBox().getChildren().clear();
+        chatController.getCurrentMessages().forEach(this::addMessageBubble);
+    }
+
+    /**
+     * Automatically scrolls chat area to the bottom.
+     * Works smoothly with animation.
+     */
     private void autoScrollToBottom() {
         Platform.runLater(() -> {
-            javafx.beans.property.DoubleProperty v = chatView.getScrollPane().vvalueProperty();
-            javafx.animation.Timeline timeline = new javafx.animation.Timeline(
-                    new javafx.animation.KeyFrame(javafx.util.Duration.millis(300),
-                            new javafx.animation.KeyValue(v, 1.0, javafx.animation.Interpolator.EASE_BOTH))
+            Timeline scrollAnimation = new Timeline(
+                    new KeyFrame(Duration.millis(AppConfig.SCROLL_ANIMATION_DURATION_MS),
+                            e -> chatView.getScrollPane().setVvalue(1.0))
             );
-            timeline.play();
+            scrollAnimation.play();
         });
     }
 
+    /**
+     * Shows typing indicator animation.
+     * Simulates AI thinking before response appears.
+     */
     private void runTypingAnimation(Runnable onFinished) {
         chatView.getTypingLabel().setManaged(true);
         chatView.getTypingLabel().setVisible(true);
-        chatView.getTypingLabel().setText("AI is typing...");
+        chatView.getTypingLabel().setText(AppConfig.TYPING_INDICATOR_TEXT);
 
         Timeline timeline = new Timeline(
-                new KeyFrame(Duration.millis(900), event -> {
+                new KeyFrame(Duration.millis(AppConfig.TYPING_ANIMATION_DURATION_MS), event -> {
                     chatView.getTypingLabel().setVisible(false);
                     chatView.getTypingLabel().setManaged(false);
                     onFinished.run();
@@ -147,31 +276,26 @@ public class MainLayout {
         timeline.play();
     }
 
-    private void refreshHistory() {
-        sidebarView.getHistoryView().setItems(FXCollections.observableArrayList(chatController.getChatHistory()));
-    }
-
-    private void toggleTheme() {
-        boolean lightMode = root.getStyleClass().contains("light-mode");
-        if (lightMode) {
-            root.getStyleClass().remove("light-mode");
-            chatView.getThemeButton().setText("Light");
-            return;
-        }
-        root.getStyleClass().add("light-mode");
-        chatView.getThemeButton().setText("Dark");
-    }
-
+    /**
+     * Displays a temporary status message (e.g., "Copied to clipboard").
+     */
     private void showTemporaryStatus(String status) {
         chatView.getTypingLabel().setText(status);
         chatView.getTypingLabel().setManaged(true);
         chatView.getTypingLabel().setVisible(true);
 
-        Timeline clear = new Timeline(new KeyFrame(Duration.millis(1200), event -> {
+        Timeline clear = new Timeline(new KeyFrame(Duration.millis(AppConfig.STATUS_MESSAGE_DURATION_MS), event -> {
             chatView.getTypingLabel().setVisible(false);
             chatView.getTypingLabel().setManaged(false);
         }));
         clear.setCycleCount(1);
         clear.play();
+    }
+
+    /**
+     * Refreshes the conversation history list in the sidebar.
+     */
+    private void refreshHistory() {
+        sidebarView.getHistoryView().setItems(FXCollections.observableArrayList(chatController.getChatHistory()));
     }
 }

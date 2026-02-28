@@ -1,13 +1,10 @@
 plugins {
+    id 'java'
     id 'application'
-    id 'org.openjfx.javafxplugin' version '0.1.0'
 }
 
-group = 'com.aicodehelper'
-version = '1.0.0'
-
 repositories {
-    mavenCentral()
+    mavenCentral()   // ⭐ REQUIRED so Gradle can download JavaFX
 }
 
 java {
@@ -15,16 +12,35 @@ java {
     targetCompatibility = JavaVersion.VERSION_17
 }
 
-javafx {
-    version = '21.0.2'
-    modules = ['javafx.controls', 'javafx.graphics']
-}
-
 application {
-    mainClass = 'com.aicodehelper.app.MainApp'
+    mainClass = 'com.example.chatbot.MainApp'
 }
 
-tasks.withType(JavaCompile).configureEach {
+dependencies {
+    implementation 'org.openjfx:javafx-base:20.0.1:win'
+    implementation 'org.openjfx:javafx-graphics:20.0.1:win'
+    implementation 'org.openjfx:javafx-controls:20.0.1:win'
+    implementation 'org.openjfx:javafx-fxml:20.0.1:win'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.2'
+}
+
+
+// configure the run task with JavaFX module-path options
+run {
+    jvmArgs = [
+        '--module-path', configurations.runtimeClasspath.asPath,
+        '--add-modules', 'javafx.base,javafx.graphics,javafx.controls,javafx.fxml'
+    ]
+}
+
+
+tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
-    options.release = 17
+}
+
+
+test {
+    useJUnitPlatform()
 }
