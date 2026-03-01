@@ -21,9 +21,13 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
+import javafx.geometry.Rectangle2D;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainController {
     // ================= SIDEBAR + CONTENT NODES =================
@@ -62,13 +66,19 @@ public class MainController {
     private double dragOffsetX;
     private double dragOffsetY;
     private Rectangle shellClip;
+    private boolean customMaximized;
+    private double restoreX;
+    private double restoreY;
+    private double restoreWidth;
+    private double restoreHeight;
 
     // ================= INITIALIZATION =================
     @FXML
     public void initialize() {
         // ---- Sidebar Actions + Selection ----
         newChatButton.setOnAction(e -> createNewConversation());
-        chatList.setCellFactory(list -> new ConversationCell());
+        chatList.setEditable(true);
+        chatList.setCellFactory(list -> new ConversationCell(this::deleteConversation, this::togglePinConversation));
         chatList.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal != null) {
                 loadConversation(newVal);
@@ -93,8 +103,7 @@ public class MainController {
     public void setStage(Stage stage) {
         this.stage = stage;
         if (stage != null) {
-            stage.maximizedProperty().addListener((obs, oldVal, isMaximized) -> updateMaximizedClass(isMaximized));
-            updateMaximizedClass(stage.isMaximized());
+            updateMaximizedClass(customMaximized);
         }
     }
 
@@ -113,9 +122,9 @@ public class MainController {
                 return;
             }
 
-            if (stage.isMaximized()) {
+            if (customMaximized) {
                 double dragRatio = event.getSceneX() / Math.max(1.0, titleBar.getWidth());
-                stage.setMaximized(false);
+                restoreFromCustomMaximize();
                 updateMaximizedClass(false);
                 stage.setX(event.getScreenX() - stage.getWidth() * dragRatio);
                 stage.setY(event.getScreenY() - dragOffsetY);
@@ -184,8 +193,56 @@ public class MainController {
         if (stage == null) {
             return;
         }
-        stage.setMaximized(!stage.isMaximized());
-        updateMaximizedClass(stage.isMaximized());
+        if (customMaximized) {
+            restoreFromCustomMaximize();
+        } else {
+            applyCustomMaximize();
+        }
+        updateMaximizedClass(customMaximized);
+    }
+
+    private void applyCustomMaximize() {
+        if (stage == null || customMaximized) {
+            return;
+        }
+
+        restoreX = stage.getX();
+        restoreY = stage.getY();
+        restoreWidth = stage.getWidth();
+        restoreHeight = stage.getHeight();
+
+        Rectangle2D bounds = getVisualBoundsForStage();
+        // Expand from the window center to avoid jumping to the left edge
+        double centerX = stage.getX() + stage.getWidth() / 2.0;
+        double newWidth = bounds.getWidth();
+        double newHeight = bounds.getHeight();
+        double newX = Math.max(bounds.getMinX(), centerX - newWidth / 2.0);
+        double newY = bounds.getMinY();
+
+        stage.setWidth(newWidth);
+        stage.setHeight(newHeight);
+        stage.setX(newX);
+        stage.setY(newY);
+        customMaximized = true;
+    }
+
+    private void restoreFromCustomMaximize() {
+        if (stage == null || !customMaximized) {
+            return;
+        }
+        stage.setX(restoreX);
+        stage.setY(restoreY);
+        stage.setWidth(restoreWidth);
+        stage.setHeight(restoreHeight);
+        customMaximized = false;
+    }
+
+    private Rectangle2D getVisualBoundsForStage() {
+        return Screen.getScreensForRectangle(stage.getX(), stage.getY(), stage.getWidth(), stage.getHeight())
+                .stream()
+                .findFirst()
+                .orElse(Screen.getPrimary())
+                .getVisualBounds();
     }
 
     // ================= MAXIMIZED CSS STATE =================
@@ -231,8 +288,71 @@ public class MainController {
     // ================= CONVERSATION ACTIONS =================
     private void createNewConversation() {
         Conversation conv = chatService.createConversation();
-        chatList.getItems().add(conv);
+        int insertIndex = getPinnedSectionSize();
+        chatList.getItems().add(insertIndex, conv);
         chatList.getSelectionModel().select(conv);
+    }
+
+    private void deleteConversation(Conversation conversation) {
+        if (conversation == null) {
+            return;
+        }
+        List<Conversation> items = chatList.getItems();
+        int index = items.indexOf(conversation);
+        if (index < 0) {
+            return;
+        }
+
+        boolean wasSelected = chatList.getSelectionModel().getSelectedItem() == conversation;
+        items.remove(index);
+
+        if (items.isEmpty()) {
+            createNewConversation();
+            return;
+        }
+
+        if (wasSelected) {
+            int nextIndex = Math.min(index, items.size() - 1);
+            chatList.getSelectionModel().select(nextIndex);
+        }
+        chatList.refresh();
+    }
+
+    private void togglePinConversation(Conversation conversation) {
+        if (conversation == null) {
+            return;
+        }
+        conversation.setPinned(!conversation.isPinned());
+        reorderConversations();
+        chatList.getSelectionModel().select(conversation);
+        chatList.refresh();
+    }
+
+    private void reorderConversations() {
+        List<Conversation> current = new ArrayList<>(chatList.getItems());
+        List<Conversation> pinned = new ArrayList<>();
+        List<Conversation> unpinned = new ArrayList<>();
+
+        for (Conversation conv : current) {
+            if (conv.isPinned()) {
+                pinned.add(conv);
+            } else {
+                unpinned.add(conv);
+            }
+        }
+
+        chatList.getItems().setAll(pinned);
+        chatList.getItems().addAll(unpinned);
+    }
+
+    private int getPinnedSectionSize() {
+        int pinnedCount = 0;
+        for (Conversation conv : chatList.getItems()) {
+            if (conv.isPinned()) {
+                pinnedCount++;
+            }
+        }
+        return pinnedCount;
     }
 
     // ================= CHAT VIEW LOADING =================
@@ -243,6 +363,7 @@ public class MainController {
             Node chatPane = loader.load();
             ChatController controller = loader.getController();
             controller.setConversation(conversation);
+            controller.setOnConversationUpdated(chatList::refresh);
 
             // ---- Replace Center Content + Stretch to Fill ----
             chatContainer.getChildren().setAll(chatPane);

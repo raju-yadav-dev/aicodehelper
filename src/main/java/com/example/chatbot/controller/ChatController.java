@@ -19,6 +19,8 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 
+import java.util.Objects;
+
 public class ChatController {
     // ================= CHAT VIEW NODES =================
     @FXML
@@ -35,6 +37,7 @@ public class ChatController {
     // ================= STATE =================
     private Conversation conversation;
     private final ChatService chatService = new ChatService();
+    private Runnable onConversationUpdated;
 
     // ================= INITIALIZATION =================
     @FXML
@@ -75,6 +78,10 @@ public class ChatController {
         refreshMessages();
     }
 
+    public void setOnConversationUpdated(Runnable onConversationUpdated) {
+        this.onConversationUpdated = onConversationUpdated;
+    }
+
     // ================= MESSAGE RENDER =================
     private void refreshMessages() {
         messageBox.getChildren().clear();
@@ -96,6 +103,7 @@ public class ChatController {
         }
 
         int previousSize = conversation.getMessages().size();
+        String previousTitle = conversation.getTitle();
         inputArea.clear();
         chatService.sendMessage(conversation, text);
 
@@ -103,6 +111,9 @@ public class ChatController {
             HBox bubble = createBubble(conversation.getMessages().get(i));
             messageBox.getChildren().add(bubble);
             playFadeIn(bubble);
+        }
+        if (onConversationUpdated != null && !Objects.equals(previousTitle, conversation.getTitle())) {
+            onConversationUpdated.run();
         }
         scrollToBottom();
     }

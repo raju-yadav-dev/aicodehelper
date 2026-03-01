@@ -23,78 +23,108 @@
 /* ================= DARK THEME ================= */
 .window-root.theme-dark {
     /* surfaces */
-    -app-bg: rgba(11, 16, 32, 0.82);
-    -app-surface: rgba(20, 27, 51, 0.66);
-    -app-surface-elevated: rgba(30, 41, 74, 0.74);
-    -app-border: rgba(181, 192, 230, 0.34);
+    -app-bg: #1b1f4a;
+    -app-surface: #262d5f;
+    -app-surface-elevated: #2d3570;
+    -app-border: rgba(191, 201, 255, 0.16);
     -app-separator: #000000;
 
     /* accent */
-    -app-accent: #5b8cff;
-    -app-accent-soft: rgba(91, 140, 255, 0.66);
-    -app-accent-hover: #7aa2ff;
-    -app-accent-pressed: #3f6fe0;
+    -app-accent: #f84f79;
+    -app-accent-soft: #f84f79;
+    -app-accent-hover: #ff6f95;
+    -app-accent-pressed: #df3e67;
 
     /* text */
-    -app-text-primary: #eaf0ff;
-    -app-text-secondary: rgba(181, 192, 230, 0.92);
-    -app-text-muted: rgba(181, 192, 230, 0.72);
+    -app-text-primary: #e9ecff;
+    -app-text-secondary: rgba(199, 208, 249, 0.90);
+    -app-text-muted: rgba(199, 208, 249, 0.66);
 
     /* states */
-    -app-muted-hover: rgba(181, 192, 230, 0.18);
-    -app-focus-ring: rgba(91, 140, 255, 0.40);
+    -app-muted-hover: rgba(184, 195, 242, 0.14);
+    -app-focus-ring: rgba(248, 79, 121, 0.42);
 }
 
-/* Dark theme glass + shadow buttons (same behavior as light mode) */
+.window-root.theme-dark .app-shell {
+    -fx-background-color:
+        linear-gradient(to bottom right, #151a43 0%, #1d2250 42%, #20265a 100%);
+    -fx-background-insets: 0;
+    -fx-background-radius: 16;
+    -fx-border-color: rgba(199, 208, 249, 0.16);
+    -fx-effect: dropshadow(gaussian, rgba(8, 11, 28, 0.66), 24, 0.2, 0, 8);
+}
+
+.window-root.theme-dark .app-root,
+.window-root.theme-dark .content-root,
+.window-root.theme-dark .chat-root,
+.window-root.theme-dark .chat-main,
+.window-root.theme-dark .messages-scroll,
+.window-root.theme-dark .messages-scroll > .viewport,
+.window-root.theme-dark .messages-scroll .corner,
+.window-root.theme-dark .list-view,
+.window-root.theme-dark .list-view .viewport,
+.window-root.theme-dark .list-view .corner {
+    -fx-background-color: transparent;
+}
+
+.window-root.theme-dark .sidebar,
+.window-root.theme-dark .title-bar,
+.window-root.theme-dark .bot-bubble,
+.window-root.theme-dark .input-shell,
+.window-root.theme-dark .context-menu,
+.window-root.theme-dark .new-chat-button {
+    -fx-background-color: #283063;
+    -fx-border-color: rgba(199, 208, 249, 0.16);
+}
+
+.window-root.theme-dark .user-bubble {
+    -fx-background-color: #b8bef2;
+    -fx-border-color: rgba(232, 236, 255, 0.24);
+    -fx-border-width: 1;
+    -fx-border-radius: 14;
+}
+
+/* Dark theme buttons */
 .window-root.theme-dark .button,
 .window-root.theme-dark .menu-button {
-    -fx-background-color:
-        linear-gradient(to bottom, rgba(73, 94, 156, 0.72), rgba(30, 41, 74, 0.72)),
-        rgba(20, 27, 51, 0.74);
-    -fx-background-insets: 0, 0;
+    -fx-background-color: #2d3570;
+    -fx-background-insets: 0;
     -fx-background-radius: 999;
-    -fx-border-color: rgba(181, 192, 230, 0.30);
+    -fx-border-color: rgba(199, 208, 249, 0.18);
     -fx-border-width: 1;
     -fx-border-radius: 999;
-    -fx-text-fill: #eaf0ff;
-    -fx-effect: dropshadow(gaussian, rgba(3, 6, 18, 0.72), 18, 0.24, 0, 6);
+    -fx-text-fill: #eef2ff;
+    -fx-effect: dropshadow(gaussian, rgba(10, 13, 34, 0.56), 12, 0.18, 0, 4);
 }
 
 .window-root.theme-dark .menu-button .label {
-    -fx-text-fill: #eaf0ff;
+    -fx-text-fill: #eef2ff;
 }
 
 .window-root.theme-dark .button:hover,
 .window-root.theme-dark .menu-button:hover {
-    -fx-background-color:
-        linear-gradient(to bottom, rgba(122, 162, 255, 0.74), rgba(73, 94, 156, 0.72)),
-        rgba(30, 41, 74, 0.78);
-    -fx-border-color: rgba(181, 192, 230, 0.46);
-    -fx-effect: dropshadow(gaussian, rgba(3, 6, 18, 0.80), 22, 0.28, 0, 7);
+    -fx-background-color: #35408a;
+    -fx-border-color: rgba(199, 208, 249, 0.22);
 }
 
 .window-root.theme-dark .button:pressed,
 .window-root.theme-dark .menu-button:showing {
-    -fx-background-color:
-        linear-gradient(to bottom, rgba(63, 111, 224, 0.76), rgba(30, 41, 74, 0.74)),
-        rgba(20, 27, 51, 0.76);
-    -fx-border-color: rgba(181, 192, 230, 0.32);
-    -fx-effect: innershadow(gaussian, rgba(234, 240, 255, 0.16), 10, 0.2, 0, 1);
+    -fx-background-color: #262e61;
+    -fx-border-color: rgba(199, 208, 249, 0.14);
+    -fx-effect: innershadow(gaussian, rgba(13, 16, 40, 0.42), 8, 0.2, 0, 1);
 }
 
 .window-root.theme-dark .chat-history-list .list-cell {
-    -fx-background-color:
-        linear-gradient(to bottom, rgba(73, 94, 156, 0.66), rgba(30, 41, 74, 0.68)),
-        rgba(20, 27, 51, 0.70);
+    -fx-background-color: #2b336e;
     -fx-background-insets: 5 0 5 0;
-    -fx-border-color: rgba(181, 192, 230, 0.32);
+    -fx-border-color: rgba(199, 208, 249, 0.16);
     -fx-border-width: 1;
     -fx-border-insets: 5 0 5 0;
     -fx-background-radius: 12;
     -fx-border-radius: 12;
-    -fx-text-fill: #eaf0ff;
+    -fx-text-fill: #eef2ff;
     -fx-padding: 0 8 0 8;
-    -fx-effect: dropshadow(gaussian, rgba(3, 6, 18, 0.72), 18, 0.24, 0, 6);
+    -fx-effect: null;
 }
 
 .window-root.theme-dark .chat-history-list .list-cell:empty {
@@ -105,60 +135,105 @@
 }
 
 .window-root.theme-dark .chat-history-list .list-cell:filled:hover {
-    -fx-background-color:
-        linear-gradient(to bottom, rgba(122, 162, 255, 0.72), rgba(73, 94, 156, 0.70)),
-        rgba(30, 41, 74, 0.76);
-    -fx-border-color: rgba(181, 192, 230, 0.44);
-    -fx-effect: dropshadow(gaussian, rgba(3, 6, 18, 0.80), 22, 0.28, 0, 7);
+    -fx-background-color: #384493;
+    -fx-border-color: rgba(199, 208, 249, 0.24);
+    -fx-effect: null;
 }
 
 .window-root.theme-dark .chat-history-list .list-cell:filled:selected,
 .window-root.theme-dark .chat-history-list .list-cell:filled:selected:focused {
-    -fx-background-color:
-        linear-gradient(to bottom, rgba(63, 111, 224, 0.76), rgba(30, 41, 74, 0.74)),
-        rgba(20, 27, 51, 0.74);
-    -fx-border-color: rgba(181, 192, 230, 0.34);
-    -fx-effect: innershadow(gaussian, rgba(234, 240, 255, 0.16), 10, 0.2, 0, 1);
+    -fx-background-color: #3f4ba0;
+    -fx-border-color: rgba(199, 208, 249, 0.24);
+    -fx-effect: null;
+}
+
+.window-root.theme-dark .title-bar {
+    -fx-background-color: #323a78;
+}
+
+.window-root.theme-dark .sidebar {
+    -fx-background-color: #262d5f;
+}
+
+.window-root.theme-dark .bot-bubble {
+    -fx-background-color: #323a78;
+    -fx-border-color: transparent;
+}
+
+.window-root.theme-dark .message-text {
+    -fx-text-fill: #e6eaff;
+}
+
+.window-root.theme-dark .user-bubble .message-text {
+    -fx-text-fill: #1f2557;
+}
+
+.window-root.theme-dark .input-shell {
+    -fx-background-color: #202754;
+    -fx-border-color: rgba(199, 208, 249, 0.12);
+    -fx-border-width: 1;
+    -fx-effect: null;
+}
+
+.window-root.theme-dark .input-shell:hover {
+    -fx-effect: null;
+}
+
+.window-root.theme-dark .input-shell.input-focused {
+    -fx-border-color: rgba(248, 79, 121, 0.45);
+    -fx-border-width: 1.2;
+    -fx-effect: null;
+}
+
+.window-root.theme-dark .send-button {
+    -fx-background-color: #f84f79;
+    -fx-text-fill: #ffffff;
+    -fx-effect: dropshadow(gaussian, rgba(248, 79, 121, 0.35), 12, 0.24, 0, 3);
+}
+
+.window-root.theme-dark .send-button:hover {
+    -fx-background-color: #ff6f95;
+}
+
+.window-root.theme-dark .send-button:pressed {
+    -fx-background-color: #df3e67;
 }
 
 /* ================= LIGHT THEME ================= */
 .window-root.theme-light {
     /* surfaces */
-    -app-bg: rgba(255, 255, 255, 0.10);
-    -app-surface: rgba(255, 255, 255, 0.16);
-    -app-surface-elevated: rgba(255, 255, 255, 0.24);
-    -app-border: rgba(255, 255, 255, 0.42);
-    -app-separator: #ffffff;
+    -app-bg: #e9e4ea; /* slightly toned down off-white */
+    -app-surface: #f0ecf4; /* less bright surface */
+    -app-surface-elevated: #f7f4f9; /* gentle elevation tint */
+    -app-border: rgba(176, 164, 196, 0.18); /* subtler borders */
+    -app-separator: #e6dfe6;
 
     /* accent */
-    -app-accent: #2da44e;
-    -app-accent-soft: rgba(45, 164, 78, 0.62);
-    -app-accent-hover: #2c974b;
-    -app-accent-pressed: #298e46;
+    -app-accent: #8d78c6;
+    -app-accent-soft: rgba(141, 120, 198, 0.30);
+    -app-accent-hover: #7f69ba;
+    -app-accent-pressed: #6f59a8;
 
     /* text */
-    -app-text-primary: #f8fafc;
-    -app-text-secondary: rgba(248, 250, 252, 0.86);
-    -app-text-muted: rgba(248, 250, 252, 0.72);
+    -app-text-primary: #2a1f35;
+    -app-text-secondary: rgba(58, 44, 75, 0.74);
+    -app-text-muted: rgba(73, 58, 92, 0.58);
 
     /* states */
-    -app-muted-hover: rgba(87, 96, 106, 0.15);
-    -app-focus-ring: rgba(45, 164, 78, 0.35);
+    -app-muted-hover: rgba(146, 124, 186, 0.12);
+    -app-focus-ring: rgba(141, 120, 198, 0.28);
     -fx-background-color: transparent;
 }
 
 .window-root.theme-light .app-shell {
     -fx-background-color:
-        linear-gradient(to bottom right, rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0.08)),
-        radial-gradient(focus-angle 0deg, focus-distance 0%, center 14% 28%, radius 33%, rgba(255, 137, 150, 0.78), rgba(255, 137, 150, 0)),
-        radial-gradient(focus-angle 0deg, focus-distance 0%, center 84% 18%, radius 36%, rgba(255, 186, 111, 0.82), rgba(255, 186, 111, 0)),
-        radial-gradient(focus-angle 0deg, focus-distance 0%, center 72% 66%, radius 44%, rgba(104, 105, 255, 0.76), rgba(104, 105, 255, 0)),
-        radial-gradient(focus-angle 0deg, focus-distance 0%, center 28% 84%, radius 42%, rgba(204, 95, 205, 0.70), rgba(204, 95, 205, 0)),
-        linear-gradient(to bottom right, #c66c92 0%, #b27ca2 25%, #8e6ac8 58%, #6a68e6 100%);
+        radial-gradient(focus-angle 0deg, focus-distance 0%, center 72% 82%, radius 34%, rgba(205, 188, 242, 0.44), rgba(205, 188, 242, 0)),
+        radial-gradient(focus-angle 0deg, focus-distance 0%, center 18% 24%, radius 28%, rgba(241, 233, 242, 0.64), rgba(241, 233, 242, 0)),
+        linear-gradient(to bottom right, #f1eaf4 0%, #efe6f1 55%, #eae4ef 100%);
     -fx-background-insets: 0;
     -fx-background-radius: 16;
-    -fx-border-color: rgba(255, 255, 255, 0.40);
-    -fx-effect: dropshadow(gaussian, rgba(7, 10, 24, 0.28), 34, 0.22, 0, 10);
+    -fx-border-color: rgba(176, 164, 196, 0.18);
+    -fx-effect: dropshadow(gaussian, rgba(54, 40, 74, 0.14), 22, 0.18, 0, 6);
 }
 
 .window-root.theme-light .app-shell.maximized {
@@ -184,28 +259,26 @@
 .window-root.theme-light .input-shell,
 .window-root.theme-light .context-menu,
 .window-root.theme-light .new-chat-button {
-    -fx-background-color: rgba(255, 255, 255, 0.16);
-    -fx-border-color: rgba(255, 255, 255, 0.38);
+    -fx-background-color: rgba(246, 241, 249, 0.88);
+    -fx-border-color: rgba(176, 164, 196, 0.18);
 }
 
 .window-root.theme-light .user-bubble {
-    -fx-background-color: rgba(255, 255, 255, 0.26);
-    -fx-border-color: rgba(255, 255, 255, 0.34);
+    -fx-background-color: #e8dff6;
+    -fx-border-color: rgba(164, 145, 201, 0.26);
     -fx-border-width: 1;
     -fx-border-radius: 14;
 }
 
-/* Light theme glass buttons */
+/* Light theme soft buttons */
 .window-root.theme-light .settings-button,
 .window-root.theme-light .new-chat-button,
 .window-root.theme-light .chat-history-list .list-cell {
-    -fx-background-color:
-        linear-gradient(to bottom, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0.16)),
-        rgba(255, 255, 255, 0.14);
-    -fx-background-insets: 0, 0;
-    -fx-border-color: rgba(255, 255, 255, 0.42);
+    -fx-background-color: rgba(244, 239, 247, 0.92);
+    -fx-background-insets: 0;
+    -fx-border-color: rgba(176, 164, 196, 0.24);
     -fx-border-width: 1;
-    -fx-effect: dropshadow(gaussian, rgba(14, 18, 35, 0.20), 16, 0.22, 0, 5);
+    -fx-effect: dropshadow(gaussian, rgba(63, 47, 86, 0.12), 12, 0.18, 0, 3);
 }
 
 .window-root.theme-light .settings-button {
@@ -221,7 +294,7 @@
 .window-root.theme-light .chat-history-list .list-cell {
     -fx-background-radius: 12;
     -fx-border-radius: 12;
-    -fx-text-fill: rgba(248, 250, 252, 0.95);
+    -fx-text-fill: -app-text-primary;
     -fx-background-insets: 5 0 5 0;
     -fx-border-insets: 5 0 5 0;
     -fx-padding: 0 8 0 8;
@@ -238,62 +311,95 @@
     -fx-padding: 0;
 }
 
-/* Apply glass + soft shadow to all light theme buttons */
+/* Apply soft style to all light theme buttons */
 .window-root.theme-light .button,
 .window-root.theme-light .menu-button {
-    -fx-background-color:
-        linear-gradient(to bottom, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0.16)),
-        rgba(255, 255, 255, 0.14);
-    -fx-background-insets: 0, 0;
+    -fx-background-color: rgba(243, 238, 246, 0.92);
+    -fx-background-insets: 0;
     -fx-background-radius: 999;
-    -fx-border-color: rgba(255, 255, 255, 0.42);
+    -fx-border-color: rgba(176, 164, 196, 0.24);
     -fx-border-width: 1;
     -fx-border-radius: 999;
-    -fx-text-fill: rgba(248, 250, 252, 0.96);
-    -fx-effect: dropshadow(gaussian, rgba(14, 18, 35, 0.20), 16, 0.22, 0, 5);
+    -fx-text-fill: -app-text-primary;
+    -fx-effect: dropshadow(gaussian, rgba(63, 47, 86, 0.10), 10, 0.14, 0, 2);
 }
 
 .window-root.theme-light .menu-button .label {
-    -fx-text-fill: rgba(248, 250, 252, 0.96);
+    -fx-text-fill: -app-text-primary;
 }
 
 .window-root.theme-light .button:hover,
 .window-root.theme-light .menu-button:hover {
-    -fx-background-color:
-        linear-gradient(to bottom, rgba(255, 255, 255, 0.46), rgba(255, 255, 255, 0.22)),
-        rgba(255, 255, 255, 0.18);
-    -fx-border-color: rgba(255, 255, 255, 0.58);
-    -fx-effect: dropshadow(gaussian, rgba(14, 18, 35, 0.24), 20, 0.24, 0, 6);
+    -fx-background-color: rgba(246, 241, 250, 0.94);
+    -fx-border-color: rgba(176, 164, 196, 0.26);
+    -fx-effect: dropshadow(gaussian, rgba(63, 47, 86, 0.14), 12, 0.18, 0, 3);
 }
 
 .window-root.theme-light .button:pressed,
 .window-root.theme-light .menu-button:showing {
-    -fx-background-color:
-        linear-gradient(to bottom, rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0.14)),
-        rgba(255, 255, 255, 0.12);
-    -fx-border-color: rgba(255, 255, 255, 0.44);
-    -fx-effect: innershadow(gaussian, rgba(255, 255, 255, 0.26), 10, 0.2, 0, 1);
+    -fx-background-color: rgba(239, 233, 248, 0.92);
+    -fx-border-color: rgba(176, 164, 196, 0.26);
+    -fx-effect: innershadow(gaussian, rgba(129, 108, 166, 0.18), 8, 0.2, 0, 1);
 }
 
 .window-root.theme-light .settings-button:hover,
 .window-root.theme-light .new-chat-button:hover,
 .window-root.theme-light .chat-history-list .list-cell:filled:hover {
-    -fx-background-color:
-        linear-gradient(to bottom, rgba(255, 255, 255, 0.46), rgba(255, 255, 255, 0.22)),
-        rgba(255, 255, 255, 0.18);
-    -fx-border-color: rgba(255, 255, 255, 0.58);
-    -fx-effect: dropshadow(gaussian, rgba(14, 18, 35, 0.24), 20, 0.24, 0, 6);
+    -fx-background-color: rgba(248, 243, 252, 0.94);
+    -fx-border-color: rgba(176, 164, 196, 0.30);
+    -fx-effect: dropshadow(gaussian, rgba(63, 47, 86, 0.16), 14, 0.2, 0, 4);
 }
 
 .window-root.theme-light .settings-button:pressed,
 .window-root.theme-light .new-chat-button:pressed,
 .window-root.theme-light .chat-history-list .list-cell:filled:selected,
 .window-root.theme-light .chat-history-list .list-cell:filled:selected:focused {
-    -fx-background-color:
-        linear-gradient(to bottom, rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0.14)),
-        rgba(255, 255, 255, 0.12);
-    -fx-border-color: rgba(255, 255, 255, 0.44);
-    -fx-effect: innershadow(gaussian, rgba(255, 255, 255, 0.26), 10, 0.2, 0, 1);
+    -fx-background-color: rgba(239, 233, 248, 0.92);
+    -fx-border-color: rgba(176, 164, 196, 0.26);
+    -fx-effect: innershadow(gaussian, rgba(129, 108, 166, 0.18), 8, 0.2, 0, 1);
+}
+
+.window-root.theme-light .title-bar {
+    -fx-background-color: rgba(248, 244, 250, 0.88);
+}
+
+.window-root.theme-light .bot-bubble {
+    -fx-background-color: rgba(248, 244, 252, 0.90);
+    -fx-border-color: rgba(176, 164, 196, 0.20);
+}
+
+.window-root.theme-light .message-text {
+    -fx-text-fill: #2a1f35;
+}
+
+.window-root.theme-light .input-shell {
+    -fx-background-color: rgba(244, 239, 247, 0.92);
+    -fx-border-color: rgba(176, 164, 196, 0.20);
+    -fx-border-width: 1;
+    -fx-effect: none;
+}
+
+.window-root.theme-light .input-shell:hover {
+    -fx-effect: none;
+}
+
+.window-root.theme-light .input-shell.input-focused {
+    -fx-border-color: rgba(141, 120, 198, 0.45);
+    -fx-border-width: 1.2;
+    -fx-effect: none;
+}
+
+.window-root.theme-light .send-button {
+    -fx-background-color: rgba(141, 120, 198, 0.18);
+    -fx-text-fill: #6f59a8;
+}
+
+.window-root.theme-light .send-button:hover {
+    -fx-background-color: rgba(141, 120, 198, 0.26);
+}
+
+.window-root.theme-light .send-button:pressed {
+    -fx-background-color: rgba(141, 120, 198, 0.34);
 }
 
 /* Light mode blob gradient background */
@@ -539,6 +645,80 @@
     -fx-text-alignment: center;
     -fx-padding: 0;
     -fx-pref-height: 42;
+}
+
+.conversation-title {
+    -fx-text-fill: -app-text-primary;
+    -fx-font-size: 13px;
+}
+
+.conversation-options-button {
+    -fx-min-width: 28;
+    -fx-pref-width: 28;
+    -fx-min-height: 28;
+    -fx-pref-height: 28;
+    -fx-padding: 0 0 0 0;
+    -fx-font-size: 14px;
+    -fx-font-weight: 700;
+    -fx-text-fill: -app-text-secondary;
+    -fx-background-color: transparent;
+    -fx-background-radius: 0;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+    -fx-border-radius: 0;
+    -fx-effect: null;
+    -fx-cursor: hand;
+}
+
+.conversation-options-button:hover {
+    -fx-text-fill: -app-text-primary;
+    -fx-background-color: transparent;
+}
+
+.conversation-options-button:pressed {
+    -fx-text-fill: -app-text-primary;
+    -fx-background-color: transparent;
+}
+
+.conversation-rename-field {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-background-insets: 0;
+    -fx-border-insets: 0;
+    -fx-padding: 0;
+    -fx-text-fill: -app-text-primary;
+    -fx-prompt-text-fill: -app-text-muted;
+}
+
+.conversation-rename-field .content {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+}
+
+.window-root.theme-dark .conversation-options-button,
+.window-root.theme-light .conversation-options-button {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
+    -fx-background-insets: 0;
+    -fx-effect: null;
+}
+
+.window-root.theme-dark .conversation-options-button:hover,
+.window-root.theme-dark .conversation-options-button:pressed,
+.window-root.theme-dark .conversation-options-button:focused,
+.window-root.theme-dark .conversation-options-button:armed,
+.window-root.theme-light .conversation-options-button:hover,
+.window-root.theme-light .conversation-options-button:pressed,
+.window-root.theme-light .conversation-options-button:focused,
+.window-root.theme-light .conversation-options-button:armed {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
+    -fx-background-insets: 0;
+    -fx-effect: null;
 }
 
 /* ================= MESSAGE AREA ================= */

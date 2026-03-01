@@ -6,8 +6,10 @@ import java.util.List;
 
 public class Conversation {
     // ================= DATA =================
-    private final String title;
+    private String title;
     private final List<Message> messages = new ArrayList<>();
+    private boolean pinned;
+    private boolean titleFinalized;
 
     // ================= CONSTRUCTOR =================
     public Conversation(String title) {
@@ -19,8 +21,28 @@ public class Conversation {
         return title;
     }
 
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
     public List<Message> getMessages() {
         return Collections.unmodifiableList(messages);
+    }
+
+    public boolean isPinned() {
+        return pinned;
+    }
+
+    public void setPinned(boolean pinned) {
+        this.pinned = pinned;
+    }
+
+    public boolean isTitleFinalized() {
+        return titleFinalized;
+    }
+
+    public void setTitleFinalized(boolean titleFinalized) {
+        this.titleFinalized = titleFinalized;
     }
 
     // ================= MUTATION =================
