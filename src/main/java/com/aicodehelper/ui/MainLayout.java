@@ -110,8 +110,13 @@ public class MainLayout {
 
         // Keyboard input: Enter to send, Shift+Enter for newline
         chatView.getInputArea().addEventFilter(KeyEvent.KEY_PRESSED, event -> {
-            if (event.getCode() == KeyCode.ENTER && !event.isShiftDown()) {
-                sendMessage();
+            if (event.getCode() == KeyCode.ENTER) {
+                if (event.isShiftDown()) {
+                    int pos = chatView.getInputArea().getCaretPosition();
+                    chatView.getInputArea().insertText(pos, "\n");
+                } else {
+                    sendMessage();
+                }
                 event.consume();
             }
         });

@@ -158,8 +158,13 @@ public class ChatController {
         Tooltip.install(inputArea, inputTooltip);
         
         inputArea.setOnKeyPressed(event -> {
-            if (event.getCode() == KeyCode.ENTER && !event.isShiftDown()) {
-                sendMessage();
+            if (event.getCode() == KeyCode.ENTER) {
+                if (event.isShiftDown()) {
+                    int pos = inputArea.getCaretPosition();
+                    inputArea.insertText(pos, "\n");
+                } else {
+                    sendMessage();
+                }
                 event.consume();
             }
         });
