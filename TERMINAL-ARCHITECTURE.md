@@ -8,7 +8,7 @@ The new terminal system replaces spawn-per-command with a **persistent shell pro
 - ✅ Runs all I/O on background threads (never blocks FX thread)
 - ✅ Provides clean, reusable backend classes
 - ✅ Keeps existing UI completely unchanged
-
+ 
 **Key Innovation:** One persistent shell process per terminal session, instead of spawning new process for each command.
 
 ---
