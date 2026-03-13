@@ -1,23 +1,26 @@
 name: Build Installers
 
 on:
+  workflow_dispatch:
   push:
     tags:
       - "v*"
-  workflow_dispatch:
 
 jobs:
 
   build:
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+
     strategy:
       matrix:
         os: [windows-latest, ubuntu-latest, macos-latest]
 
-    runs-on: ${{ matrix.os }}
-
     steps:
-      - name: Checkout Repo
+
+      - name: Checkout Repository
         uses: actions/checkout@v4
+
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -25,23 +28,36 @@ jobs:
           distribution: temurin
           java-version: 21
 
-      - name: Grant Gradle Permission
+
+      - name: Give permission to Gradle
         if: runner.os != 'Windows'
         run: chmod +x gradlew
 
-      - name: Build Project
+
+      - name: Build project with Gradle
         run: ./gradlew build
 
-      - name: Package App
+
+      - name: Find JAR file
+        id: findjar
+        shell: bash
+        run: |
+          JAR=$(ls build/libs/*.jar | head -n 1)
+          echo "jarfile=$JAR" >> $GITHUB_OUTPUT
+
+
+      - name: Create installer
+        shell: bash
         run: |
           jpackage \
-          --input build/libs \
-          --main-jar cortex.jar \
-          --name Cortex \
-          --dest dist \
-          --type app-image
+            --input build/libs \
+            --main-jar $(basename ${{ steps.findjar.outputs.jarfile }}) \
+            --name Cortex \
+            --dest dist \
+            --type app-image
 
-      - name: Upload Build
+
+      - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: cortex-${{ runner.os }}
