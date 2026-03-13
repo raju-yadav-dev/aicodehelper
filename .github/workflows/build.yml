@@ -1,4 +1,4 @@
-name: Build Installers
+name: Build Cortex Installers
 
 on:
   workflow_dispatch:
@@ -9,12 +9,11 @@ on:
 jobs:
 
   build:
-    name: Build on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-
     strategy:
       matrix:
         os: [windows-latest, ubuntu-latest, macos-latest]
+
+    runs-on: ${{ matrix.os }}
 
     steps:
 
@@ -29,36 +28,134 @@ jobs:
           java-version: 21
 
 
-      - name: Give permission to Gradle
+      - name: Make Gradle executable
         if: runner.os != 'Windows'
         run: chmod +x gradlew
 
 
-      - name: Build project with Gradle
-        run: ./gradlew build
+      - name: Build Project
+        run: ./gradlew clean build
 
 
-      - name: Find JAR file
-        id: findjar
+      - name: Find JAR
+        id: jar
         shell: bash
         run: |
           JAR=$(ls build/libs/*.jar | head -n 1)
           echo "jarfile=$JAR" >> $GITHUB_OUTPUT
 
 
-      - name: Create installer
+      - name: Create Runtime Image
+        shell: bash
+        run: |
+          jlink \
+            --add-modules java.base,java.desktop,java.logging,java.sql \
+            --output runtime \
+            --strip-debug \
+            --no-header-files \
+            --no-man-pages
+
+
+# ---------------- WINDOWS ----------------
+
+      - name: Build Windows EXE
+        if: runner.os == 'Windows'
         shell: bash
         run: |
           jpackage \
-            --input build/libs \
-            --main-jar $(basename ${{ steps.findjar.outputs.jarfile }}) \
             --name Cortex \
+            --input build/libs \
+            --main-jar $(basename ${{ steps.jar.outputs.jarfile }}) \
+            --runtime-image runtime \
+            --type exe \
             --dest dist \
-            --type app-image
+            --app-version 1.0 \
+            --vendor "Cortex AI"
 
 
-      - name: Upload Artifact
+      - name: Build Windows MSI
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          jpackage \
+            --name Cortex \
+            --input build/libs \
+            --main-jar $(basename ${{ steps.jar.outputs.jarfile }}) \
+            --runtime-image runtime \
+            --type msi \
+            --dest dist \
+            --app-version 1.0 \
+            --vendor "Cortex AI"
+
+
+# ---------------- LINUX ----------------
+
+      - name: Build Linux DEB
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          jpackage \
+            --name cortex \
+            --input build/libs \
+            --main-jar $(basename ${{ steps.jar.outputs.jarfile }}) \
+            --runtime-image runtime \
+            --type deb \
+            --dest dist \
+            --app-version 1.0 \
+            --vendor "Cortex AI"
+
+
+      - name: Build Linux RPM
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          jpackage \
+            --name cortex \
+            --input build/libs \
+            --main-jar $(basename ${{ steps.jar.outputs.jarfile }}) \
+            --runtime-image runtime \
+            --type rpm \
+            --dest dist \
+            --app-version 1.0 \
+            --vendor "Cortex AI"
+
+
+# ---------------- MAC ----------------
+
+      - name: Build macOS DMG
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          jpackage \
+            --name Cortex \
+            --input build/libs \
+            --main-jar $(basename ${{ steps.jar.outputs.jarfile }}) \
+            --runtime-image runtime \
+            --type dmg \
+            --dest dist \
+            --app-version 1.0 \
+            --vendor "Cortex AI"
+
+
+      - name: Build macOS PKG
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          jpackage \
+            --name Cortex \
+            --input build/libs \
+            --main-jar $(basename ${{ steps.jar.outputs.jarfile }}) \
+            --runtime-image runtime \
+            --type pkg \
+            --dest dist \
+            --app-version 1.0 \
+            --vendor "Cortex AI"
+
+
+# ---------------- UPLOAD ----------------
+
+      - name: Upload Installers
         uses: actions/upload-artifact@v4
         with:
-          name: cortex-${{ runner.os }}
-          path: dist/
+          name: cortex-${{ runner.os }}-installers
+          path: dist/*
