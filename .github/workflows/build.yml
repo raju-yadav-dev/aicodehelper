@@ -9,15 +9,16 @@ on:
 jobs:
 
   build:
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+
     strategy:
       matrix:
         os: [windows-latest, ubuntu-latest, macos-latest]
 
-    runs-on: ${{ matrix.os }}
-
     steps:
 
-      - name: Checkout Repository
+      - name: Checkout repository
         uses: actions/checkout@v4
 
 
@@ -37,23 +38,23 @@ jobs:
         run: ./gradlew clean build
 
 
-      - name: Find JAR
+      - name: Find built JAR
         id: jar
         shell: bash
         run: |
           JAR=$(ls build/libs/*.jar | head -n 1)
-          echo "jarfile=$JAR" >> $GITHUB_OUTPUT
+          echo "jar=$JAR" >> $GITHUB_OUTPUT
 
 
-      - name: Create Runtime Image
+      - name: Create runtime image
         shell: bash
         run: |
           jlink \
             --add-modules java.base,java.desktop,java.logging,java.sql \
-            --output runtime \
             --strip-debug \
             --no-header-files \
-            --no-man-pages
+            --no-man-pages \
+            --output runtime
 
 
 # ---------------- WINDOWS ----------------
@@ -65,12 +66,17 @@ jobs:
           jpackage \
             --name Cortex \
             --input build/libs \
-            --main-jar $(basename ${{ steps.jar.outputs.jarfile }}) \
+            --main-jar $(basename ${{ steps.jar.outputs.jar }}) \
             --runtime-image runtime \
             --type exe \
             --dest dist \
+            --icon assets/icon.ico \
+            --vendor "Cortex AI" \
             --app-version 1.0 \
-            --vendor "Cortex AI"
+            --win-shortcut \
+            --win-menu \
+            --win-menu-group "Cortex" \
+            --win-dir-chooser
 
 
       - name: Build Windows MSI
@@ -80,12 +86,17 @@ jobs:
           jpackage \
             --name Cortex \
             --input build/libs \
-            --main-jar $(basename ${{ steps.jar.outputs.jarfile }}) \
+            --main-jar $(basename ${{ steps.jar.outputs.jar }}) \
             --runtime-image runtime \
             --type msi \
             --dest dist \
+            --icon assets/icon.ico \
+            --vendor "Cortex AI" \
             --app-version 1.0 \
-            --vendor "Cortex AI"
+            --win-shortcut \
+            --win-menu \
+            --win-menu-group "Cortex" \
+            --win-dir-chooser
 
 
 # ---------------- LINUX ----------------
@@ -97,10 +108,13 @@ jobs:
           jpackage \
             --name cortex \
             --input build/libs \
-            --main-jar $(basename ${{ steps.jar.outputs.jarfile }}) \
+            --main-jar $(basename ${{ steps.jar.outputs.jar }}) \
             --runtime-image runtime \
             --type deb \
             --dest dist \
+            --icon assets/icon.png \
+            --linux-shortcut \
+            --linux-menu-group "Utility" \
             --app-version 1.0 \
             --vendor "Cortex AI"
 
@@ -112,15 +126,18 @@ jobs:
           jpackage \
             --name cortex \
             --input build/libs \
-            --main-jar $(basename ${{ steps.jar.outputs.jarfile }}) \
+            --main-jar $(basename ${{ steps.jar.outputs.jar }}) \
             --runtime-image runtime \
             --type rpm \
             --dest dist \
+            --icon assets/icon.png \
+            --linux-shortcut \
+            --linux-menu-group "Utility" \
             --app-version 1.0 \
             --vendor "Cortex AI"
 
 
-# ---------------- MAC ----------------
+# ---------------- MACOS ----------------
 
       - name: Build macOS DMG
         if: runner.os == 'macOS'
@@ -129,12 +146,13 @@ jobs:
           jpackage \
             --name Cortex \
             --input build/libs \
-            --main-jar $(basename ${{ steps.jar.outputs.jarfile }}) \
+            --main-jar $(basename ${{ steps.jar.outputs.jar }}) \
             --runtime-image runtime \
             --type dmg \
             --dest dist \
-            --app-version 1.0 \
-            --vendor "Cortex AI"
+            --icon assets/icon.icns \
+            --vendor "Cortex AI" \
+            --app-version 1.0
 
 
       - name: Build macOS PKG
@@ -144,18 +162,19 @@ jobs:
           jpackage \
             --name Cortex \
             --input build/libs \
-            --main-jar $(basename ${{ steps.jar.outputs.jarfile }}) \
+            --main-jar $(basename ${{ steps.jar.outputs.jar }}) \
             --runtime-image runtime \
             --type pkg \
             --dest dist \
-            --app-version 1.0 \
-            --vendor "Cortex AI"
+            --icon assets/icon.icns \
+            --vendor "Cortex AI" \
+            --app-version 1.0
 
 
 # ---------------- UPLOAD ----------------
 
-      - name: Upload Installers
+      - name: Upload installers
         uses: actions/upload-artifact@v4
         with:
-          name: cortex-${{ runner.os }}-installers
+          name: cortex-${{ runner.os }}
           path: dist/*
