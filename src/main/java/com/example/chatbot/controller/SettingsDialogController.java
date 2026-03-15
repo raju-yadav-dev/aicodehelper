@@ -404,7 +404,7 @@ public class SettingsDialogController {
         addKeyRow.setAlignment(Pos.CENTER_LEFT);
 
         TextField baseUrlField = new TextField(
-                initialSetup.baseUrl().isBlank() ? initialDefinition.defaultBaseUrl() : initialSetup.baseUrl()
+            initialSetup.baseUrl()
         );
         baseUrlField.setPromptText(initialDefinition.defaultBaseUrl());
         baseUrlField.getStyleClass().add("settings-text-field");
@@ -413,7 +413,7 @@ public class SettingsDialogController {
         HBox baseUrlRow = createUnboundTextFieldRow("Base URL", baseUrlField);
 
         TextField modelNameField = new TextField(
-                initialSetup.modelName().isBlank() ? initialDefinition.defaultModelName() : initialSetup.modelName()
+            initialSetup.modelName()
         );
         modelNameField.setPromptText(initialDefinition.defaultModelName());
         modelNameField.getStyleClass().add("settings-text-field");

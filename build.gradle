@@ -58,8 +58,7 @@ jar {
     archiveBaseName = 'Cortex'
     manifest {
         attributes(
-            'Main-Class': 'com.example.chatbot.CortexLauncher',
-            'Implementation-Version': archiveVersion
+            'Main-Class': 'com.example.chatbot.CortexLauncher'
         )
     }
     duplicatesStrategy = 'exclude'
@@ -69,7 +68,15 @@ jar {
 }
 
 def appName = 'Cortex'
-def appVersion = '1.2.1'
+ext {
+    versionProps = new Properties()
+    file('version.properties').withInputStream { stream -> versionProps.load(stream) }
+    appVersion = versionProps['version']
+}
+afterEvaluate {
+    jar.manifest.attributes['Implementation-Version'] = appVersion
+}
+
 def vendorName = 'Cortex AI'
 def isWindows = currentOs.windows
 def installerOutputDir = layout.buildDirectory.dir('installers')
