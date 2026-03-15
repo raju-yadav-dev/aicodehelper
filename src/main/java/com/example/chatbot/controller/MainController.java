@@ -768,15 +768,10 @@ public class MainController {
             dialog.initStyle(javafx.stage.StageStyle.TRANSPARENT);
             dialog.setTitle(dialogTitle);
 
-            // Custom title bar with close button
+            // Custom title bar for drag only; closing is handled by the footer button.
             Label titleLabel = new Label(dialogTitle);
             titleLabel.getStyleClass().add("settings-title-label");
-            Region spacer = new Region();
-            HBox.setHgrow(spacer, Priority.ALWAYS);
-            Button closeBtn = new Button("\u2715");
-            closeBtn.getStyleClass().add("settings-close-button");
-            closeBtn.setOnAction(e -> dialog.close());
-            HBox titleBarBox = new HBox(titleLabel, spacer, closeBtn);
+            HBox titleBarBox = new HBox(titleLabel);
             titleBarBox.getStyleClass().add("settings-title-bar");
             titleBarBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
 

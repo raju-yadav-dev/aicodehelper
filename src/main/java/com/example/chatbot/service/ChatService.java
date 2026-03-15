@@ -202,6 +202,22 @@ public class ChatService {
         String latestUserText = extractLatestUserMessage(historySnapshot);
         boolean hasImageAttachment = imageAttachment != null && imageAttachment.hasData();
         PromptIntent promptIntent = classifyPromptIntent(latestUserText, hasImageAttachment);
+        if (shouldGenerateSupportingImage(latestUserText, promptIntent, requestMode, hasImageAttachment)) {
+            Message mixedReply = requestMixedEducationalReply(historySnapshot, loaded, latestUserText, requestMode);
+            if (mixedReply != null) {
+                return mixedReply;
+            }
+        }
+        return requestSingleProviderReply(historySnapshot, imageAttachment, requestMode, loaded, latestUserText, promptIntent);
+    }
+
+    private Message requestSingleProviderReply(List<Message> historySnapshot,
+                                               ImageAttachment imageAttachment,
+                                               RequestMode requestMode,
+                                               LoadedProperties loaded,
+                                               String latestUserText,
+                                               PromptIntent promptIntent) {
+        boolean hasImageAttachment = imageAttachment != null && imageAttachment.hasData();
         ProviderType requestedProvider = resolveRequestedProvider(latestUserText, promptIntent, hasImageAttachment, requestMode);
         List<ProviderType> attemptOrder = buildProviderAttemptOrder(
                 requestedProvider,
@@ -244,6 +260,31 @@ public class ChatService {
 
         String errorDetail = (lastError == null || lastError.isBlank()) ? "Unknown API error." : lastError;
         return new Message(Message.Sender.BOT, "I could not call the AI API.\n\n- " + errorDetail);
+    }
+
+    private Message requestMixedEducationalReply(List<Message> historySnapshot,
+                                                 LoadedProperties loaded,
+                                                 String latestUserText,
+                                                 RequestMode requestMode) {
+        Message textReply = requestSingleProviderReply(
+                historySnapshot,
+                null,
+                requestMode == RequestMode.BEST ? RequestMode.BEST : RequestMode.GROQ,
+                loaded,
+                latestUserText,
+                PromptIntent.TEXT_CHAT
+        );
+        if (textReply == null || !isSuccessfulAssistantReply(textReply.getContent())) {
+            return textReply;
+        }
+
+        String imageMarkdown = requestSupportingImageMarkdown(loaded, latestUserText, textReply.getContent());
+        if (imageMarkdown == null || imageMarkdown.isBlank()) {
+            return textReply;
+        }
+
+        String combinedContent = mergeTextAndImageContent(textReply.getContent(), imageMarkdown);
+        return new Message(Message.Sender.BOT, combinedContent);
     }
 
     private ProviderAttemptResult requestWithProviderFailover(ProviderConfig config,
@@ -456,6 +497,42 @@ public class ChatService {
             String modelSlug = resolveFreepikImageModel(config.modelName());
             String endpoint = buildFreepikImageEndpoint(config.baseUrl(), modelSlug);
             String body = buildFreepikGenerationRequestJson(latestUserText);
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(endpoint))
+                    .header("x-freepik-api-key", apiKey)
+                    .header("Accept", "application/json")
+                    .header("Content-Type", "application/json")
+                    .timeout(REQUEST_TIMEOUT)
+                    .POST(HttpRequest.BodyPublishers.ofString(body, StandardCharsets.UTF_8))
+                    .build();
+
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+            if (response.statusCode() < 200 || response.statusCode() >= 300) {
+                String error = extractErrorMessage(response.body());
+                String details = providerDisplayName(config.providerType()) + " API HTTP "
+                        + response.statusCode() + " - " + error;
+                return ProviderCallResult.failure(details, shouldRetryWithNextKey(response.statusCode()));
+            }
+
+            String imageUrl = extractFirstGeneratedAsset(response.body());
+            String taskId = extractFreepikTaskId(response.body());
+            if ((imageUrl == null || imageUrl.isBlank()) && taskId != null && !taskId.isBlank()) {
+                imageUrl = pollFreepikImageUrl(config.baseUrl(), apiKey, modelSlug, taskId);
+            }
+
+            String content = buildFreepikResponseContent(imageUrl, taskId, modelSlug);
+            return ProviderCallResult.success(content);
+        } catch (Throwable ex) {
+            String message = providerDisplayName(config.providerType()) + " request failed: " + ex.getMessage();
+            return ProviderCallResult.failure(message, true);
+        }
+    }
+
+    private ProviderCallResult callFreepikSupportingImage(ProviderConfig config, String apiKey, String imagePrompt) {
+        try {
+            String modelSlug = resolveFreepikImageModel(config.modelName());
+            String endpoint = buildFreepikImageEndpoint(config.baseUrl(), modelSlug);
+            String body = buildFreepikGenerationRequestJson(imagePrompt);
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(endpoint))
                     .header("x-freepik-api-key", apiKey)
@@ -1247,14 +1324,6 @@ public class ChatService {
         if (isImageUnderstandingPrompt(normalized)) {
             return PromptIntent.IMAGE_UNDERSTANDING;
         }
-        // New: If prompt contains both image and text keywords, prefer IMAGE_GENERATION
-        if (containsAny(normalized, "image", "photo", "picture") && containsAny(normalized, "explain", "describe", "text", "label")) {
-            return PromptIntent.IMAGE_GENERATION;
-        }
-        // New: If prompt contains video and text keywords, prefer VIDEO_GENERATION
-        if (containsAny(normalized, "video", "clip", "animation") && containsAny(normalized, "explain", "describe", "text", "label")) {
-            return PromptIntent.VIDEO_GENERATION;
-        }
         return PromptIntent.TEXT_CHAT;
     }
 
@@ -1325,6 +1394,46 @@ public class ChatService {
                 "image analysis");
     }
 
+    private boolean shouldGenerateSupportingImage(String text,
+                                                  PromptIntent promptIntent,
+                                                  RequestMode requestMode,
+                                                  boolean hasImageAttachment) {
+        if (hasImageAttachment || promptIntent != PromptIntent.TEXT_CHAT) {
+            return false;
+        }
+        RequestMode mode = requestMode == null ? RequestMode.BEST : requestMode;
+        if (mode != RequestMode.BEST && mode != RequestMode.GROQ) {
+            return false;
+        }
+        String normalized = text == null ? "" : text.toLowerCase(Locale.ROOT);
+        if (normalized.isBlank()) {
+            return false;
+        }
+        return containsAny(normalized,
+                "with image",
+                "with an image",
+                "with diagram",
+                "with a diagram",
+                "with illustration",
+                "visualize",
+                "visualise",
+                "show visually",
+                "show me visually",
+                "flowchart",
+                "diagram",
+                "illustration",
+                "visual aid",
+                "chart",
+                "timeline",
+                "map",
+                "anatomy",
+                "structure",
+                "architecture",
+                "workflow",
+                "process",
+                "how it works");
+    }
+
     private boolean containsAny(String text, String... terms) {
         if (text == null || terms == null) {
             return false;
@@ -1348,6 +1457,76 @@ public class ChatService {
             }
         }
         return "";
+    }
+
+    private boolean isSuccessfulAssistantReply(String content) {
+        if (content == null || content.isBlank()) {
+            return false;
+        }
+        return !content.contains("I could not call the AI API")
+                && !content.contains("API keys are missing for:");
+    }
+
+    private String requestSupportingImageMarkdown(LoadedProperties loaded,
+                                                  String latestUserText,
+                                                  String textReplyContent) {
+        ProviderConfig config = resolveProviderConfig(ProviderType.FREEPIK, loaded);
+        if (config.apiKeys().isEmpty()) {
+            return null;
+        }
+
+        String imagePrompt = buildSupportingImagePrompt(latestUserText, textReplyContent);
+        String lastError = null;
+        for (String apiKey : config.apiKeys()) {
+            ProviderCallResult result = callFreepikSupportingImage(config, apiKey, imagePrompt);
+            if (result.success()) {
+                return result.content();
+            }
+            lastError = result.error();
+            if (!result.retryWithNextKey()) {
+                break;
+            }
+        }
+        return null;
+    }
+
+    private String buildSupportingImagePrompt(String latestUserText, String textReplyContent) {
+        String topic = latestUserText == null ? "" : latestUserText.trim();
+        if (topic.length() > 280) {
+            topic = topic.substring(0, 280);
+        }
+
+        String supportingContext = stripMarkdownForImagePrompt(textReplyContent);
+        if (supportingContext.length() > 420) {
+            supportingContext = supportingContext.substring(0, 420);
+        }
+
+        return """
+                Create a clean educational illustration that helps explain this topic.
+                Topic: %s
+                Context: %s
+                Style: informative, easy to understand, modern, clear composition, minimal clutter, readable labels only when necessary.
+                """.formatted(topic, supportingContext).trim();
+    }
+
+    private String stripMarkdownForImagePrompt(String content) {
+        if (content == null || content.isBlank()) {
+            return "";
+        }
+        String cleaned = content.replaceAll("```[\\s\\S]*?```", " ");
+        cleaned = cleaned.replaceAll("!\\[[^\\]]*\\]\\([^)]*\\)", " ");
+        cleaned = cleaned.replaceAll("[#>*`_\\-]+", " ");
+        cleaned = cleaned.replaceAll("\\s+", " ").trim();
+        return cleaned;
+    }
+
+    private String mergeTextAndImageContent(String textContent, String imageMarkdown) {
+        String base = textContent == null ? "" : textContent.trim();
+        String image = imageMarkdown == null ? "" : imageMarkdown.trim();
+        if (base.isBlank()) {
+            return "### Visual Aid\n\n" + image;
+        }
+        return base + "\n\n### Visual Aid\n\n" + image;
     }
 
     private AiProviderSetupSupport.ProviderSetup configuredSetupFor(String providerId) {

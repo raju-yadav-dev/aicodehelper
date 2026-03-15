@@ -790,7 +790,6 @@ public class SettingsDialogController {
         if (onSave != null) {
             onSave.run();
         }
-        closeDialog();
     }
 
     private void collectBindings(Node node) {

@@ -276,7 +276,8 @@ public class ChatController {
         Tooltip.install(inputArea, inputTooltip);
         
         inputArea.setOnKeyPressed(event -> {
-            if (event.getCode() == KeyCode.V && event.isShortcutDown()) {
+            if ((event.getCode() == KeyCode.V && event.isShortcutDown())
+                    || (event.getCode() == KeyCode.INSERT && event.isShiftDown())) {
                 if (tryAttachImageFromClipboard()) {
                     event.consume();
                     return;
@@ -1194,7 +1195,7 @@ public class ChatController {
         copyIcon.getStyleClass().add("bubble-copy-icon");
         copyIcon.setFocusTraversable(false);
         copyIcon.setOnAction(e -> {
-            copyCodeToClipboard(msg.getContent());
+            copyMessagePrimaryContent(msg);
             copyIcon.setText("\u2713");
             PauseTransition revert = new PauseTransition(Duration.millis(1200));
             revert.setOnFinished(ev -> copyIcon.setText("\uD83D\uDCCB"));
@@ -1357,21 +1358,20 @@ public class ChatController {
             lineContainerNode = lineContainerNode.getParent();
         }
 
-        Node markdownContainerNode = lineContainerNode == null ? null : lineContainerNode.getParent();
-        while (markdownContainerNode != null
-                && (!(markdownContainerNode instanceof VBox)
-                || !markdownContainerNode.getStyleClass().contains("message-markdown"))) {
-            markdownContainerNode = markdownContainerNode.getParent();
+        Node insertionContainerNode = lineContainerNode == null ? null : lineContainerNode.getParent();
+        while (insertionContainerNode != null
+                && (!(insertionContainerNode instanceof VBox))) {
+            insertionContainerNode = insertionContainerNode.getParent();
         }
 
-        if (lineContainerNode != null && markdownContainerNode instanceof VBox markdownContainer) {
-            return new SelectedLineContext(selectedText, lineContainerNode, markdownContainer, selectedArea);
+        if (lineContainerNode != null && insertionContainerNode instanceof VBox insertionContainer) {
+            return new SelectedLineContext(selectedText, lineContainerNode, insertionContainer, selectedArea);
         }
         return null;
     }
 
     private void insertInlineQuestion(SelectedLineContext selectedContext) {
-        VBox targetContainer = selectedContext.markdownContainer() instanceof VBox v ? v : null;
+        VBox targetContainer = selectedContext.insertionContainer() instanceof VBox v ? v : null;
         Node selectedLineNode = selectedContext.lineNode();
         String selectedText = selectedContext.selectedText();
 
@@ -1485,7 +1485,7 @@ public class ChatController {
         });
     }
 
-    private record SelectedLineContext(String selectedText, Node lineNode, Node markdownContainer, TextArea selectedArea) {}
+    private record SelectedLineContext(String selectedText, Node lineNode, Node insertionContainer, TextArea selectedArea) {}
 
     private void submitInlineQuestion(String selectedText, String question, VBox answerBox) {
         // Show loading indicator
@@ -1545,7 +1545,7 @@ public class ChatController {
             copyButton = new Button("Copy");
             copyButton.getStyleClass().add("message-copy-button");
             copyButton.setFocusTraversable(false);
-            copyButton.setOnAction(event -> copyCodeToClipboard(msg.getContent()));
+            copyButton.setOnAction(event -> copyMessagePrimaryContent(msg));
         }
 
         VBox bubble;
@@ -1725,29 +1725,29 @@ public class ChatController {
 
     private Node createAttachedImageNode(Message msg) {
         if (msg == null || !msg.hasImageAttachment()) {
-            return createImageNode(null, "Image preview unavailable", false);
+            return createImageNode(null, "Image preview unavailable", false, null);
         }
         try {
             Image image = new Image(new ByteArrayInputStream(msg.getImageData()));
             String caption = msg.getImageFileName() == null || msg.getImageFileName().isBlank()
                     ? "Attached image"
                     : msg.getImageFileName();
-            return createImageNode(image, caption, false);
+            return createImageNode(image, caption, false, null);
         } catch (Exception ignored) {
-            return createImageNode(null, "Image preview unavailable", false);
+            return createImageNode(null, "Image preview unavailable", false, null);
         }
     }
 
     private Node createRemoteImageNode(String imageSource, String altText) {
         String caption = altText == null || altText.isBlank() ? "Generated image" : altText.trim();
         try {
-            return createImageNode(new Image(imageSource, true), caption, true);
+            return createImageNode(new Image(imageSource, true), caption, true, imageSource);
         } catch (Exception ignored) {
-            return createImageNode(null, caption, true);
+            return createImageNode(null, caption, true, imageSource);
         }
     }
 
-    private Node createImageNode(Image image, String caption, boolean remoteImage) {
+    private Node createImageNode(Image image, String caption, boolean remoteImage, String imageSource) {
         VBox container = new VBox(6);
         container.getStyleClass().add("message-image-block");
         applyResponsiveMaxWidth(container);
@@ -1767,6 +1767,7 @@ public class ChatController {
         imageView.setPreserveRatio(true);
         imageView.setSmooth(true);
         bindResponsiveImageWidth(imageView);
+        installImageCopyBehavior(frame, imageView, caption, imageSource);
 
         frame.getChildren().addAll(placeholder, imageView);
         refreshImageNodeState(image, imageView, placeholder, remoteImage);
@@ -1785,6 +1786,31 @@ public class ChatController {
             container.getChildren().add(captionLabel);
         }
         return container;
+    }
+
+    private void installImageCopyBehavior(StackPane frame, ImageView imageView, String caption, String imageSource) {
+        if (frame == null || imageView == null) {
+            return;
+        }
+
+        ContextMenu imageMenu = new ContextMenu();
+        MenuItem copyImageItem = new MenuItem("Copy image");
+        copyImageItem.setOnAction(event -> copyRenderedImageToClipboard(imageView.getImage(), imageSource, caption));
+        imageMenu.getItems().add(copyImageItem);
+
+        frame.setOnContextMenuRequested(event -> {
+            imageMenu.show(frame, event.getScreenX(), event.getScreenY());
+            event.consume();
+        });
+        frame.setOnMouseClicked(event -> {
+            if (event.getButton() == MouseButton.SECONDARY) {
+                return;
+            }
+            imageMenu.hide();
+            if (event.getClickCount() >= 2) {
+                copyRenderedImageToClipboard(imageView.getImage(), imageSource, caption);
+            }
+        });
     }
 
     private Button createMessageDownloadButton(Message msg) {
@@ -2132,6 +2158,100 @@ public class ChatController {
         ClipboardContent content = new ClipboardContent();
         content.putString(code == null ? "" : code);
         clipboard.setContent(content);
+    }
+
+    private void copyMessagePrimaryContent(Message msg) {
+        if (msg == null) {
+            return;
+        }
+        if (msg.hasImageAttachment()) {
+            try {
+                Image image = new Image(new ByteArrayInputStream(msg.getImageData()));
+                if (image.getWidth() > 0 && image.getHeight() > 0) {
+                    copyImageToClipboard(image);
+                    showNotification("Image copied to clipboard");
+                    return;
+                }
+            } catch (Exception ignored) {
+                // Fall back to text copy below.
+            }
+        }
+
+        String imageSource = extractPrimaryImageSource(msg.getContent());
+        String textWithoutImages = stripMarkdownImageLinks(msg.getContent());
+        if (imageSource != null && textWithoutImages.isBlank()) {
+            copyRenderedImageToClipboard(null, imageSource, "Generated image");
+            return;
+        }
+
+        copyCodeToClipboard(msg.getContent());
+    }
+
+    private String extractPrimaryImageSource(String content) {
+        if (content == null || content.isBlank()) {
+            return null;
+        }
+        Matcher matcher = MARKDOWN_IMAGE_PATTERN.matcher(content);
+        if (!matcher.find()) {
+            return null;
+        }
+        String imageSource = matcher.group(2);
+        return imageSource == null || imageSource.isBlank() ? null : imageSource.trim();
+    }
+
+    private String stripMarkdownImageLinks(String content) {
+        if (content == null || content.isBlank()) {
+            return "";
+        }
+        return MARKDOWN_IMAGE_PATTERN.matcher(content).replaceAll("").trim();
+    }
+
+    private void copyRenderedImageToClipboard(Image image, String imageSource, String caption) {
+        if (image != null && image.getWidth() > 0 && image.getHeight() > 0) {
+            copyImageToClipboard(image);
+            showNotification("Image copied to clipboard");
+            return;
+        }
+        if (imageSource == null || imageSource.isBlank()) {
+            showNotification("\u2717 Image is not available to copy");
+            return;
+        }
+
+        CompletableFuture.supplyAsync(() -> downloadImageForClipboard(imageSource))
+                .whenComplete((downloadedImage, error) -> Platform.runLater(() -> {
+                    if (error != null || downloadedImage == null || downloadedImage.getWidth() <= 0 || downloadedImage.getHeight() <= 0) {
+                        showNotification("\u2717 Failed to copy image" + (caption == null || caption.isBlank() ? "" : ": " + caption));
+                        return;
+                    }
+                    copyImageToClipboard(downloadedImage);
+                    showNotification("Image copied to clipboard");
+                }));
+    }
+
+    private Image downloadImageForClipboard(String imageSource) {
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(imageSource))
+                    .timeout(java.time.Duration.ofSeconds(20))
+                    .GET()
+                    .build();
+            HttpResponse<byte[]> response = imageDownloadClient.send(request, HttpResponse.BodyHandlers.ofByteArray());
+            if (response.statusCode() < 200 || response.statusCode() >= 300) {
+                return null;
+            }
+            return new Image(new ByteArrayInputStream(response.body()));
+        } catch (Exception ignored) {
+            return null;
+        }
+    }
+
+    private void copyImageToClipboard(Image image) {
+        if (image == null) {
+            return;
+        }
+        ClipboardContent content = new ClipboardContent();
+        content.putImage(image);
+        Clipboard.getSystemClipboard().setContent(content);
     }
 
     private void runCodeSnippet(String language, String code, Button runButton, Button stopButton) {
