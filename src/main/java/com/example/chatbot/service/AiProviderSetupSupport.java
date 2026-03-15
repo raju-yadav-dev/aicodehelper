@@ -23,17 +23,17 @@ public final class AiProviderSetupSupport {
     private static final Gson GSON = new Gson();
     private static final Type SETUP_LIST_TYPE = new TypeToken<List<ProviderSetup>>() { }.getType();
 
-    private static final ProviderDefinition GROQ = new ProviderDefinition(
+        private static final ProviderDefinition GROQ = new ProviderDefinition(
             PROVIDER_GROQ,
             "Groq",
-            "https://api.groq.com/openai",
-            "llama-3.3-70b-versatile",
+            "",
+            "",
             "groq_base_url",
             "groq_model",
             "groq_api",
             "groq_api_keys",
             "groq_api_"
-    );
+        );
     private static final ProviderDefinition GOOGLE = new ProviderDefinition(
             PROVIDER_GOOGLE,
             "Google AI Studio",
@@ -127,7 +127,7 @@ public final class AiProviderSetupSupport {
     }
 
     public static ProviderSetup defaultSetup() {
-        return createDefaultSetup(PROVIDER_GROQ);
+        return new ProviderSetup(PROVIDER_GROQ, "", "", List.of());
     }
 
     public static ProviderSetup createDefaultSetup(String providerId) {

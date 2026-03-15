@@ -39,8 +39,8 @@ public class ChatService {
     // ================= IN-MEMORY STORE =================
     private final List<Conversation> conversations = new ArrayList<>();
     private static final int TITLE_MAX_LENGTH = 28;
-    private static final String DEFAULT_GROQ_MODEL = "llama-3.3-70b-versatile";
-    private static final String DEFAULT_GROQ_BASE_URL = "https://api.groq.com/openai";
+    private static final String DEFAULT_GROQ_MODEL = "";
+    private static final String DEFAULT_GROQ_BASE_URL = "";
     private static final String DEFAULT_GOOGLE_MODEL = "gemini-2.0-flash";
     private static final String DEFAULT_GOOGLE_BASE_URL = "https://generativelanguage.googleapis.com";
     private static final String DEFAULT_LEONARDO_BASE_URL = "https://cloud.leonardo.ai/api/rest/v1";

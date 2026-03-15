@@ -5,6 +5,8 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
+import java.io.InputStream;
+import java.util.Properties;
 
 /**
  * Builds the About section content so MainController stays focused on window flow.
@@ -18,7 +20,16 @@ public final class AboutSectionView {
         Label appName = new Label("Cortex");
         appName.getStyleClass().add("about-app-name");
 
-        Label versionLabel = new Label("Version: 1.5.0");
+        String version = "Unknown";
+        try (InputStream stream = new java.io.FileInputStream("d:/GitHub/AI-project/cortex/version.properties")) {
+            Properties props = new Properties();
+            props.load(stream);
+            version = props.getProperty("version", version);
+        } catch (Exception e) {
+            // Optionally log or handle error
+        }
+
+        Label versionLabel = new Label("Version: " + version);
         versionLabel.getStyleClass().add("about-version");
 
         Button updateButton = new Button("Check for Updates");
